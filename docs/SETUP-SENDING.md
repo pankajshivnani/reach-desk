@@ -26,7 +26,9 @@ You'll make one Google Sheet that holds the queue. Each of your 5 inboxes then c
 1. In the sheet: **Share** → add the inbox's address as **Editor** (untick "Notify" if you like).
 2. Log into that inbox. Easiest: a separate Chrome profile per inbox, or an incognito window.
 3. Open the sheet → **Extensions → Apps Script**.
-4. Function dropdown → **installSender** → **Run** → allow the permissions (same "Advanced → Go to… → Allow" steps).
+4. Function dropdown → **installSender** → **Run** → allow the permissions (same "Advanced → Go to… → Allow" steps). The warning names your main email as "developer" and may call the app "Untitled project": both are fine.
+   - After the permission pop-up, check the log says "Sender installed for …". If it says "Setup done" instead, the editor ran the wrong function: pick **installSender** again and **Run**.
+   - Tip: if all inboxes are signed into one Chrome, open the script as a given inbox by adding `?authuser=that.inbox@gmail.com` to the script's address.
 5. Optional: choose **testSend** → **Run**. It sends one test email from this inbox to your `notify_email`.
 6. The **Inboxes** tab now shows this address. In Reach Desk, **Refresh status** lists it too.
 
