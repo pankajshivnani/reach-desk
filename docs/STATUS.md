@@ -22,10 +22,11 @@ Insights detected: idea-first vs guest-name titles, what the top 5 share, titles
 - Tested locally against a simulated Sheet + Gmail (21 checks pass: caps, window, no double sends, two inboxes never take the same lead, replies, opt-outs, out-of-office ignored, threading, weekends, pause).
 - `reach-desk.html`: Outbox URL + token in Keys; per lead "Email to send to" + star; "Queue this email" on each email draft; "Queue picked to outbox" for ticked rows; Outbox status box (sends left today, queue, follow-ups due, replies, per-inbox status, days to clear the queue).
 - Setup guide for Pankaj: `docs/SETUP-SENDING.md`.
+- **Part A done (2026-10-13):** sheet "Reach Desk Outbox" made in the main account, script + Gmail service installed, `setup` run, notify_email set, web app deployed (version 2) and checked live (right token works, wrong token rejected; status is a POST so the token never sits in a URL). No inboxes connected yet.
 
 ## Next steps
 0. Pankaj: restrict the YouTube key (Google Cloud Console > APIs & Services > Credentials > API restrictions > YouTube Data API v3).
-1. Pankaj: follow `docs/SETUP-SENDING.md` with **one** inbox first, run `testSend`, then queue 1–2 leads to his own other addresses to see the first email + follow-up thread. Then add the other 4 inboxes.
+1. Pankaj: paste the Outbox URL + token into Reach Desk Keys (step A9). Then part B with **one** inbox first, run `testSend`, then queue 1–2 leads to his own other addresses to see the first email + follow-up thread. Then add the other 4 inboxes.
 2. Pankaj tests insights on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe) and says which drafts he'd send.
 3. Tune thresholds/templates from that feedback (especially guest-name detection).
 4. Apollo CSV export/import for missing emails (free-plan friendly).

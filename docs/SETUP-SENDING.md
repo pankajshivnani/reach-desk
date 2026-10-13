@@ -19,6 +19,7 @@ You'll make one Google Sheet that holds the queue. Each of your 5 inboxes then c
 8. In Apps Script: **Deploy → New deployment** → gear icon → **Web app**.
    - Execute as: **Me**. Who has access: **Anyone**. → **Deploy** → copy the **Web app URL**.
    - "Anyone" only means the page can reach it; nothing gets in without the token.
+   - If you open that URL in a browser tab you'll see `{"ok":false,"error":"use POST"}`. That's normal: only Reach Desk talks to it, with the token tucked inside the request (never in the address).
 9. Open `reach-desk.html`. In **Keys**, paste the **Outbox web app URL** and the **Outbox token**, tick **Remember**, then click **Refresh status** in the Outbox box.
 
 ## B. Connect each inbox (repeat for all 5)
