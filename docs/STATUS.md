@@ -21,7 +21,8 @@ Insights detected: idea-first vs guest-name titles, what the top 5 share, titles
 0. Pankaj: restrict the API key to YouTube Data API v3 only (Google Cloud Console > APIs & Services > Credentials).
 1. Pankaj tests on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe): do the numbers match YouTube? Do the insights match what he saw? Which drafts would he actually send?
 2. Tune thresholds/templates from that feedback (especially the guest-name detection).
-3. Step 4: sheet push with tracking columns (insight used, sent date, follow-ups, replied, loom, call, paid).
+3. Step 4 = automated sending, per `docs/SPEC-SENDING.md` (sheet as queue + one Apps Script sender per Gmail inbox, follow-ups in thread, reply/bounce/opt-out detection). Waiting on Pankaj's answers to the open questions there.
+   - Note: Apollo would be a second external API; CLAUDE.md says "only YouTube Data API". Needs Pankaj's OK before 4d (CSV import/export doesn't need it).
 4. Backup button: download/restore notes + saved channels as a file (everything currently lives in one browser only).
 
 ## Waiting on

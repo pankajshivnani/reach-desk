@@ -76,6 +76,9 @@ Free text box per channel. Saved locally.
 ## 6. Tracking
 Push to Google Sheet: date, channel, host, email/links, insight used, sent date, follow up 1 (day 3), follow up 2 (day 7), replied, loom sent, call, paid.
 
+## 7. Sending (proposal)
+Automated low-volume sending from a few Gmail inboxes via Google Sheet + Apps Script. See `docs/SPEC-SENDING.md` (draft, waiting on Pankaj's answers).
+
 ## Later (not now)
 - Name finder helpers (search links for host name)
 - Follow-up drafts that add a new insight each time
