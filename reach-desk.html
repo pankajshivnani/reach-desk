@@ -1186,7 +1186,7 @@ $('queuebulk').onclick=async function(){
 
 async function refreshOutbox(quiet){
  var o; try{o=obConf();}catch(e){if(!quiet)$('obstatus').textContent=e.message;return;}
- try{var r=await fetch(o.u+'?token='+encodeURIComponent(o.t)), d=await r.json();
+ try{var r=await fetch(o.u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:o.t,action:'status'})}), d=await r.json();
   if(!d.ok)throw new Error(d.error);
   obLeads=d.leads||{}; obSendWithoutName=!!d.sendWithoutName;
   var live=d.inboxes.filter(function(i){return !i.paused}), cap=live.reduce(function(a,i){return a+i.cap},0),

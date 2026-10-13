@@ -185,6 +185,7 @@ function doPost(e) {
   var ss = SpreadsheetApp.getActive(), cfg = settings(ss), body;
   try { body = JSON.parse(e.postData.contents); } catch (x) { return json({ok: false, error: 'bad request'}); }
   if (!cfg.token || body.token !== cfg.token) return json({ok: false, error: 'wrong token'});
+  if (body.action === 'status') return status(ss, cfg);
   var lock = LockService.getScriptLock(); lock.waitLock(20000);
   try {
     var out = table(ss, TABS.out), have = {}, added = 0, skipped = [];
@@ -202,9 +203,9 @@ function doPost(e) {
   } finally { lock.releaseLock(); }
 }
 
-function doGet(e) {
-  var ss = SpreadsheetApp.getActive(), cfg = settings(ss);
-  if (!cfg.token || (e.parameter || {}).token !== cfg.token) return json({ok: false, error: 'wrong token'});
+/* Status is a POST too, so the token never sits in a URL */
+function doGet() { return json({ok: false, error: 'use POST'}); }
+function status(ss, cfg) {
   var tz = ss.getSpreadsheetTimeZone(), now = new Date(), out = table(ss, TABS.out), inb = table(ss, TABS.inb);
   var counts = {}, leads = {}, fuDue = 0;
   out.rows.forEach(function (r) {
