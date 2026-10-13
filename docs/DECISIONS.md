@@ -9,3 +9,5 @@
 - **2026-10-13** — New work goes in `reach-desk.html`; `prospect-finder-v5.html` stays as the untouched original.
 - **2026-10-13** — Per-channel data is cached in the browser for 24h (reopening is free). Video descriptions are stored trimmed to 500 chars; chapters and contacts are worked out from the full text before trimming.
 - **2026-10-13** — Shorts = 3 min or under (per spec; v5's search scoring still uses its own 65s rule).
+- **2026-10-13** — Key/sheet URL can be remembered in the browser, but only if Pankaj ticks the box (off by default).
+- **2026-10-13** — Search is the quota hog (100 units per page; a default run is up to ~3,800 units). The tool shows the cost before each run and warns when it won't fit. No extra API keys/projects to get around the limit (breaks YouTube's terms); if more is ever needed, apply for a quota increase.

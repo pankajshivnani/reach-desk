@@ -105,6 +105,10 @@ td button.chip{margin-top:6px;padding:4px 9px}
     <div><label for="key">YouTube Data API key</label><input id="key" type="password" placeholder="AIza..." autocomplete="off"></div>
     <div><label for="sheet">Google Sheet webhook URL</label><input id="sheet" type="text" placeholder="https://script.google.com/macros/s/.../exec"></div>
   </div>
+  <p class="hint" style="margin-top:10px">
+    <label style="display:inline;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink)">
+      <input type="checkbox" id="remember"> Remember key and sheet URL on this computer</label>
+    &nbsp;Saved only in this browser. Untick to forget them. Don't tick this on a shared computer.</p>
   <p class="hint" id="quota"></p>
 </fieldset>
 
@@ -190,6 +194,7 @@ td button.chip{margin-top:6px;padding:4px 9px}
   <button id="csv" class="ghost" disabled>Download CSV</button>
   <button id="stop" class="ghost" disabled>Stop</button>
 </div>
+<p class="hint" id="cost" style="margin-top:-6px"></p>
 
 <div id="status" class="status" style="display:none"></div>
 <div id="funnel" class="funnel"><h4>Where channels were lost</h4><div id="funnelrows"></div><div class="fix" id="funnelfix"></div></div>
@@ -421,6 +426,9 @@ $('run').onclick=async function(){
  var queries=$('queries').value.split('\n').map(function(s){return s.trim()}).filter(Boolean);
  if(!key)return say('Add your API key first.','bad');
  if(!queries.length)return say('Generate some search terms first.','bad');
+ var est=runCost(), left=10000-usedToday();
+ if(est>left&&!confirm('This run could use up to '+est.toLocaleString()+' units, but only about '+Math.max(0,left).toLocaleString()
+  +' are left today.\n\nTip: use fewer search lines or 2 pages.\n\nRun anyway?'))return;
  var days=+$('days').value,cap=+$('cap').value,depth=+$('depth').value;
  var minSubs=+$('minsubs').value||0,maxSubs=+$('maxsubs').value||1e12;
  var minBudget=+$('minbudget').value||0,minRel=+$('minrel').value||0;
@@ -547,9 +555,33 @@ $('csv').onclick=function(){var keys=Object.keys(rowFor(results[0]));
 function ptDay(){return new Date().toLocaleDateString('en-CA',{timeZone:'America/Los_Angeles'});}
 var quota=store.get('rd_quota',{day:'',used:0});
 function spend(n){if(quota.day!==ptDay())quota={day:ptDay(),used:0};quota.used+=n;store.set('rd_quota',quota);showQuota();}
-function showQuota(){var u=quota.day===ptDay()?quota.used:0;
- $('quota').textContent='YouTube units used today from this browser: '+u.toLocaleString()+' of 10,000. Resets midnight Pacific.';}
+function usedToday(){return quota.day===ptDay()?quota.used:0;}
+function showQuota(){var u=usedToday();
+ $('quota').textContent='YouTube units used today from this browser: '+u.toLocaleString()+' of 10,000. Resets midnight Pacific.';
+ showCost();}
+
+/* Worst-case cost of one "Find prospects" run: every search page is 100 units, each channel ~2 more */
+function runCost(){var q=$('queries').value.split('\n').filter(function(s){return s.trim()}).length;
+ var cap=+$('cap').value; return q*(+$('depth').value)*100+cap*2+Math.ceil(cap/50);}
+function showCost(){var q=$('queries').value.split('\n').filter(function(s){return s.trim()}).length;
+ var est=runCost(), left=10000-usedToday();
+ $('cost').innerHTML='Find prospects: up to <b>'+est.toLocaleString()+'</b> units ('+q+' search lines × '+$('depth').value
+  +' pages × 100, plus ~2 per channel). About '+Math.max(0,left).toLocaleString()+' left today.'
+  +(est>left?' <span class="warn">Not enough left.</span>':'');}
+['queries','depth','cap'].forEach(function(id){$(id).addEventListener('input',showCost);$(id).addEventListener('change',showCost);});
+$('gen').addEventListener('click',showCost);
+document.querySelectorAll('#niches .chip').forEach(function(b){b.addEventListener('click',showCost);});
 showQuota();
+
+/* Remember key + sheet URL (opt-in, this browser only) */
+var REM=['key','sheet'];
+if(store.get('rd_remember',false)){$('remember').checked=true;
+ REM.forEach(function(id){$(id).value=store.get('rd_'+id,'');});
+ $('push').disabled=!picked.size||!$('sheet').value.trim();}
+function saveRemembered(){if($('remember').checked)REM.forEach(function(id){store.set('rd_'+id,$(id).value.trim());});}
+REM.forEach(function(id){$(id).addEventListener('input',saveRemembered);});
+$('remember').onchange=function(){store.set('rd_remember',this.checked);
+ if(this.checked)saveRemembered();else REM.forEach(function(id){try{localStorage.removeItem('rd_'+id);}catch(e){}});};
 
 /* ---------- Step 1: per-channel analysis ---------- */
 var N_VIDS=30, CACHE_MS=24*3600000, CK='rd_chan_';

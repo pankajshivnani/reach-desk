@@ -10,8 +10,11 @@
   - Shows: subs, long vs shorts (≤3 min), median views, days since last upload, avg gap, chapters on 20min+ videos, trailer yes/no, contacts (emails, LinkedIn, X, Instagram, sites), top 5 vs latest 5 thumbnails, full video table (sortable).
   - Warns when fewer than 10 videos.
   - Quota counter under the Keys box (counts calls from this browser only).
+- Opt-in "Remember key and sheet URL" tick box (saved in this browser only).
+- "Find prospects" shows its worst-case unit cost and asks before a run that would go over today's remaining quota.
 
 ## Next steps
+0. Pankaj: restrict the API key to YouTube Data API v3 only in Google Cloud Console (APIs & Services > Credentials).
 1. Pankaj tests step 1 with his real key on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe). Check the numbers match YouTube.
 2. Build step 2: insight detection + scoring + cards (adjust views for video age).
 3. Build step 3: notes box, template drafts, reply pitch, Loom notes.
