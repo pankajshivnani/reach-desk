@@ -1,6 +1,10 @@
 # Reach Desk — Sending spec (draft, 2026-10-13)
 
-Status: **proposal, not built.** Pankaj to answer the open questions at the bottom first.
+Status: **core built (2026-10-13)**: `apps-script/Code.gs` + queue/status in `reach-desk.html`. Setup: `docs/SETUP-SENDING.md`.
+
+**Pankaj's answers:** 5 secondary Gmail inboxes (none is his main), 3–4 emails/day each (default 4). Apollo is probably the free plan, so emails are pasted by hand for now (CSV import later). Unanswered so far: target countries/timezone (set in the sheet), no-name rule (default: hold), generic-template test (not built).
+
+**How the inboxes connect (as built):** one sheet, one script bound to it. Each inbox is an Editor on the sheet and runs `installSender()` once, which gives it its own 15-minute timer that runs *as that inbox*. Inboxes are not assigned up front: whichever inbox has room claims the next queued lead (claim, wait, re-check, so two inboxes never take the same lead). Selecting more than today's capacity is fine: the rest waits for the next days.
 
 ## Goal
 Send a small, steady number of cold emails every weekday (about 20 sends/day total) from a few Gmail inboxes, with follow-ups and reply detection, **without paying for Instantly/Smartlead**. Pankaj spends his time only on the best leads and on replies.
@@ -17,7 +21,7 @@ Send a small, steady number of cold emails every weekday (about 20 sends/day tot
 |---|---|---|
 | **Reach Desk page** (this repo, in the browser) | Find leads, insights, drafts, approve, push to the queue, show status | free |
 | **Google Sheet** "Reach Desk Outbox" | Queue + tracking (one row per lead) | free |
-| **Sender script**, one per Gmail inbox (Google Apps Script, inside each Gmail account) | Every 15 min: send what's due from its own rows, send follow-ups in the same thread, detect replies and bounces, write the status back to the sheet | free |
+| **Sender script**: one script bound to the sheet; each inbox installs its own timer | Every 15 min: send what's due from its own rows, send follow-ups in the same thread, detect replies and bounces, write the status back to the sheet | free |
 | **Apollo** | Find the email + first name when the channel doesn't show one | Pankaj's existing plan |
 
 Why Apps Script and not "connect Gmail to the page": a page can only send while it's open, and Google makes plain web pages go through a heavy app-approval process to send mail. A script inside each Gmail account sends as that account with one "Allow" click, keeps running on Google's servers, and is free.

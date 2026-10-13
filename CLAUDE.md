@@ -13,7 +13,7 @@ Local tool for Zizzy (Pankaj's agency) to find YouTube channels/podcasts, analyz
 - Push back directly if something is a bad idea.
 
 ## Hard rules
-- **No Claude/OpenAI/any LLM API.** Only the YouTube Data API v3 (his own key). Everything runs locally in the browser.
+- **No Claude/OpenAI/any LLM API.** Only the YouTube Data API v3 (his own key). The tool runs locally in the browser; sending runs as Google Apps Script inside Pankaj's own Google accounts (`apps-script/`, see `docs/SETUP-SENDING.md`).
 - **Never invent numbers.** Every insight must come from real channel data. If data is thin, say so.
 - **Respect YouTube quota** (10,000 units/day): cache results; search costs 100 units, video/playlist/channel lookups cost 1.
 - API keys never get committed. Keys are typed into the page and kept in the browser only.

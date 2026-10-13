@@ -125,10 +125,12 @@ label.inl{display:inline;text-transform:none;letter-spacing:0;font-size:12px;col
   <div class="grid g2">
     <div><label for="key">YouTube Data API key</label><input id="key" type="password" placeholder="AIza..." autocomplete="off"></div>
     <div><label for="sheet">Google Sheet webhook URL</label><input id="sheet" type="text" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <div><label for="outbox">Outbox web app URL (sending)</label><input id="outbox" type="text" placeholder="https://script.google.com/macros/s/.../exec"></div>
+    <div><label for="otoken">Outbox token</label><input id="otoken" type="password" placeholder="from the Settings tab of the Outbox sheet" autocomplete="off"></div>
   </div>
   <p class="hint" style="margin-top:10px">
     <label style="display:inline;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink)">
-      <input type="checkbox" id="remember"> Remember key and sheet URL on this computer</label>
+      <input type="checkbox" id="remember"> Remember keys and URLs on this computer</label>
     &nbsp;Saved only in this browser. Untick to forget them. Don't tick this on a shared computer.</p>
   <p class="hint" id="quota"></p>
 </fieldset>
@@ -141,6 +143,12 @@ label.inl{display:inline;text-transform:none;letter-spacing:0;font-size:12px;col
   </div>
   <p class="hint">For channels you found elsewhere. Leads from Find prospects already have this, free. Costs about 3 units. Saved for 24 hours, so opening again is free. A plain name (not a link or @handle) costs 100 units, because it needs a search.</p>
   <div class="cached" id="cachedlist"></div>
+</fieldset>
+
+<fieldset>
+  <legend>Outbox (automatic sending)</legend>
+  <div class="bar" style="margin:0 0 8px"><button class="ghost" id="obref">Refresh status</button><span class="count" id="obwhen"></span></div>
+  <div id="obstatus" class="hint">Add the Outbox web app URL and token above, then Refresh. Setup guide: docs/SETUP-SENDING.md</div>
 </fieldset>
 
 <div id="anstatus" class="status" style="display:none"></div>
@@ -211,6 +219,7 @@ label.inl{display:inline;text-transform:none;letter-spacing:0;font-size:12px;col
 <div class="bar">
   <button id="run">Find prospects</button>
   <button id="push" class="ghost" disabled>Send picked to Sheet</button>
+  <button id="queuebulk" class="ghost">Queue picked to outbox</button>
   <button id="csv" class="ghost" disabled>Download CSV</button>
   <button id="stop" class="ghost" disabled>Stop</button>
 </div>
@@ -603,7 +612,7 @@ document.querySelectorAll('#niches .chip').forEach(function(b){b.addEventListene
 showQuota();
 
 /* Remember key + sheet URL (opt-in, this browser only) */
-var REM=['key','sheet'];
+var REM=['key','sheet','outbox','otoken'];
 if(store.get('rd_remember',false)){$('remember').checked=true;
  REM.forEach(function(id){$(id).value=store.get('rd_'+id,'');});
  $('push').disabled=!picked.size||!$('sheet').value.trim();}
@@ -691,7 +700,7 @@ function showCached(){var idx=cacheIndex().slice(0,15);
 showCached();
 
 /* Per-lead inputs Pankaj types (kept forever, separate from the 24h data cache) */
-function leadGet(id){return Object.assign({name:'',ep:'',ai:false,edits:false,notes:'',pick:''},store.get('rd_lead_'+id,{}));}
+function leadGet(id){return Object.assign({name:'',email:'',star:false,ep:'',ai:false,edits:false,notes:'',pick:''},store.get('rd_lead_'+id,{}));}
 function leadSet(id,o){store.set('rd_lead_'+id,o);}
 
 async function analyse(input,force,order){
@@ -1031,6 +1040,10 @@ function renderLead(){
 
   +'<h3>Your inputs</h3><div class="grid g2">'
    +'<div><label for="lname">Host first name</label><input id="lname" value="'+esc(L.name)+'" placeholder="e.g. ted"></div>'
+   +'<div><label for="lemail">Email to send to</label><input id="lemail" list="lemails" value="'+esc(L.email||ct.emails[0]||'')+'" placeholder="from descriptions, Apollo or by hand">'
+    +'<datalist id="lemails">'+ct.emails.map(function(e){return '<option value="'+esc(e)+'">'}).join('')+'</datalist></div>'
+   +'<div style="align-self:end"><label class="inl"><input type="checkbox" id="lstar"'+(L.star?' checked':'')+'> ⭐ priority (sent first)</label>'
+    +'<span class="tag" id="lobst">'+esc(outboxLine(c.id))+'</span></div>'
    +'<div><label for="lep">Episode you watched (optional)</label><select id="lep"><option value="">(none)</option>'
     +vids.map(function(v){return '<option value="'+esc(v.title)+'"'+(L.ep===v.title?' selected':'')+'>'+esc(v.title.slice(0,80))+'</option>'}).join('')+'</select></div></div>'
    +'<p class="hint" style="margin-top:8px"><label class="inl"><input type="checkbox" id="lai"'+(L.ai?' checked':'')+'> clips look AI edited</label>'
@@ -1080,6 +1093,7 @@ function renderLead(){
  bind('lname','name','input',function(e){return e.value}); bind('lep','ep','change',function(e){return e.value});
  bind('lai','ai','change',function(e){return e.checked}); bind('ledits','edits','change',function(e){return e.checked});
  bind('lnotes','notes','input',function(e){return e.value});
+ bind('lemail','email','input',function(e){return e.value.trim()}); bind('lstar','star','change',function(e){return e.checked});
  D.querySelectorAll('th[data-sk]').forEach(function(th){th.onclick=function(){var k=th.dataset.sk,top=D.scrollTop;
   if(anSort.k===k)anSort.dir*=-1;else{anSort.k=k;anSort.dir=-1;} renderLead(); D.scrollTop=top;};});
 
@@ -1092,7 +1106,8 @@ function renderLead(){
   if(L.edits)loom.push('- best moments need proper edits');
   if(L.notes.trim())loom.push('- my notes: '+L.notes.trim());
   function blk(title,text,sub){return '<div class="draft">'+(sub!=null?'<div class="drow"><input value="'+esc(sub)+'"><button class="chip" data-cp="prev">Copy subject</button></div>':'')
-   +'<textarea>'+esc(text)+'</textarea><div class="drow"><span class="count">'+text.split(/\s+/).filter(Boolean).length+' words</span><button class="chip" data-cp="ta">Copy '+title+'</button></div></div>';}
+   +'<textarea>'+esc(text)+'</textarea><div class="drow"><span class="count">'+text.split(/\s+/).filter(Boolean).length+' words</span><span>'
+   +(sub!=null&&pick.send?'<button class="chip" data-q="1">Queue this email</button> ':'')+'<button class="chip" data-cp="ta">Copy '+title+'</button></span></div></div>';}
   box.innerHTML=(pick.send?'':'<p class="status bad">This insight is weak. Better not to send it.</p>')
    +(!L.name.trim()?'<p class="hint warn">Add the host\'s first name above. Drafts say "hey" until you do.</p>':'')
    +'<h3>Email &mdash; 3 versions (no pitch)</h3><div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj)}).join('')+'</div>'
@@ -1101,8 +1116,81 @@ function renderLead(){
    +'<h3>Follow-ups</h3><div class="drafts">'+FOLLOW.map(function(t){return blk('follow-up',t.replace(/^day \d: /,''),null).replace('<div class="draft">','<div class="draft"><span class="tag">'+t.slice(0,5)+'</span>')}).join('')+'</div>'
    +'<h3>Loom notes</h3><div class="drafts">'+blk('Loom notes',loom.length?loom.join('\n'):'- nothing else found')+'</div>';
   box.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(){var d=b.closest('.draft'),
-   el=b.dataset.cp==='prev'?b.previousElementSibling:d.querySelector('textarea'); copyText(el.value,b);};});}
+   el=b.dataset.cp==='prev'?b.previousElementSibling:d.querySelector('textarea'); copyText(el.value,b);};});
+  box.querySelectorAll('[data-q]').forEach(function(b){b.onclick=async function(){var d=b.closest('.draft');
+   var row=outboxRow(c,pick,L,d.querySelector('input').value,d.querySelector('textarea').value);
+   if(typeof row==='string')return alert(row);
+   b.disabled=true;b.textContent='Queueing...';
+   try{var r=await queueRows([row]); b.textContent=r.added?'Queued':'Not queued';
+    if(!r.added)alert('Not queued: '+((r.skipped[0]||{}).reason||'unknown')); else{obLeads[c.id]={status:'queued'};$('lobst').textContent=outboxLine(c.id);}}
+   catch(e){b.disabled=false;b.textContent='Queue this email';alert(e.message);}};});}
  drafts();}
+
+/* ---------- Step 4: outbox (Google Sheet + sender script in each inbox) ---------- */
+var obLeads={}, obSendWithoutName=false;
+function obConf(){var u=$('outbox').value.trim(),t=$('otoken').value.trim();
+ if(!u||!t)throw new Error('Add the Outbox web app URL and token in Keys first.');return{u:u,t:t};}
+function outboxLine(id){var s=obLeads[id];return s?'outbox: '+s.status+(s.inbox?' from '+s.inbox:''):'';}
+
+function outboxRow(c,ins,L,subj,body){
+ var email=(L.email||c.contacts.emails[0]||'').trim().toLowerCase();
+ if(!email)return 'No email for this lead. Add one in "Email to send to" (from Apollo or by hand).';
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return 'That email doesn\'t look right: '+email;
+ if(!L.name.trim()&&!obSendWithoutName)return 'Add the host\'s first name first (or set send_without_name to TRUE in the sheet).';
+ return{lead_id:c.id,channel:c.title,channel_url:'https://www.youtube.com/channel/'+c.id,country:c.country||'',
+  host_name:L.name.trim(),email:email,email_source:c.contacts.emails.indexOf(email)>=0?'description':'manual',
+  template_version:'insight-v1',insight_type:ins.type,insight_score:ins.score,starred:L.star?'TRUE':'',subject:subj,body:body,
+  fu1_body:'',fu2_body:''};}
+
+async function queueRows(rows){var o=obConf();
+ var r=await fetch(o.u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:o.t,rows:rows})});
+ var j; try{j=await r.json();}catch(e){throw new Error('The outbox didn\'t answer properly. Check the web app URL and that access is "Anyone".');}
+ if(!j.ok)throw new Error('Outbox: '+j.error); refreshOutbox(true); return j;}
+
+$('queuebulk').onclick=async function(){
+ var ids=Array.from(picked); if(!ids.length)return say('Tick the leads you want first (checkbox on the left).','bad');
+ var rows=[],skipped=[];
+ ids.forEach(function(id){var c=loadChannel(id), name=(results.filter(function(r){return r.id===id})[0]||{}).title||id;
+  if(!c)return skipped.push(name+': data expired, open the lead to reload it');
+  var L=leadGet(id), R=insightsFor(c), ins=R.list.filter(function(o){return o.type===L.pick&&o.send})[0]||(R.best&&R.best.send?R.best:null);
+  if(!ins)return skipped.push(name+': no strong insight (skip lead)');
+  var e=emailDrafts(c,ins,L)[0], row=outboxRow(c,ins,L,e.subj,e.body);
+  if(typeof row==='string')return skipped.push(name+': '+row);
+  rows.push(row);});
+ if(!rows.length)return say('Nothing queued.\n'+skipped.join('\n'),'bad');
+ $('queuebulk').disabled=true; say('Queueing '+rows.length+'...');
+ try{var r=await queueRows(rows);
+  r.skipped.forEach(function(x){skipped.push(x.lead_id+': '+x.reason)});
+  say('Queued '+r.added+'. The inboxes send them inside your sending hours, oldest and starred first.'+(skipped.length?'\nNot queued:\n'+skipped.join('\n'):''),r.added?'good':'bad');
+ }catch(e){say(e.message,'bad');}finally{$('queuebulk').disabled=false;}};
+
+async function refreshOutbox(quiet){
+ var o; try{o=obConf();}catch(e){if(!quiet)$('obstatus').textContent=e.message;return;}
+ try{var r=await fetch(o.u+'?token='+encodeURIComponent(o.t)), d=await r.json();
+  if(!d.ok)throw new Error(d.error);
+  obLeads=d.leads||{}; obSendWithoutName=!!d.sendWithoutName;
+  var live=d.inboxes.filter(function(i){return !i.paused}), cap=live.reduce(function(a,i){return a+i.cap},0),
+   left=live.reduce(function(a,i){return a+Math.max(0,i.cap-i.sentToday)},0), q=(d.counts.queued||0)+(d.counts.claiming||0);
+  var perDayNew=Math.max(1,Math.round(cap/3));
+  $('obstatus').innerHTML=(d.paused?'<p class="status bad">PAUSED: nothing is sending (Settings tab, paused = TRUE).</p>':'')
+   +'<div class="stats">'
+   +'<div class="stat"><b>'+left+' / '+cap+'</b><span>sends left today</span></div>'
+   +'<div class="stat"><b>'+q+'</b><span>waiting in queue</span></div>'
+   +'<div class="stat"><b>'+d.followupsDue+'</b><span>follow-ups due</span></div>'
+   +'<div class="stat"><b>'+((d.counts.sent||0)+(d.counts.fu1||0)+(d.counts.fu2||0))+' / '+(d.counts.done||0)+'</b><span>in sequence / finished</span></div>'
+   +'<div class="stat"><b>'+(d.counts.replied||0)+'</b><span>replied</span></div>'
+   +'<div class="stat"><b>'+((d.counts.bounced||0)+(d.counts['opted-out']||0))+'</b><span>bounced / opted out</span></div></div>'
+   +'<p class="hint">Queue clears in about <b>'+Math.ceil(q/perDayNew)+' weekdays</b> (roughly '+perDayNew+' new leads a day: follow-ups use about 2 of every 3 sends).</p>'
+   +'<table style="min-width:0;margin-top:8px"><tr><th>Inbox</th><th>Today</th><th>Last run</th><th></th></tr>'
+   +(d.inboxes.length?d.inboxes.map(function(i){return '<tr><td>'+esc(i.inbox)+'</td><td class="num">'+i.sentToday+' / '+i.cap+'</td>'
+     +'<td class="num">'+(i.lastRun?esc(ago(i.lastRun)):'never')+'</td><td>'+(i.paused?'<span class="warn">paused</span>':'')
+     +(i.lastError?' <span class="warn">'+esc(String(i.lastError).slice(0,120))+'</span>':'')+'</td></tr>'}).join('')
+    :'<tr><td colspan="4">No inboxes yet. Each inbox runs installSender() once (see the guide).</td></tr>')+'</table>';
+  $('obwhen').textContent='updated '+new Date().toLocaleTimeString();
+  if(cur&&$('lobst'))$('lobst').textContent=outboxLine(cur.id);
+ }catch(e){$('obstatus').textContent='Could not reach the outbox: '+e.message;}}
+$('obref').onclick=function(){refreshOutbox(false);};
+if($('outbox').value.trim()&&$('otoken').value.trim())refreshOutbox(true);
 
 </script>
 </body>

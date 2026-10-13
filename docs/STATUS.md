@@ -17,13 +17,20 @@
 
 Insights detected: idea-first vs guest-name titles, what the top 5 share, titles over 60 chars, episode numbers up front, views dropping, hidden gem, topic winners, rising now, evergreen, shorts gap / shorts winning, length sweet spot, no chapters, no trailer, views after a posting break.
 
+## Sending (built 2026-10-13, not yet tried on real inboxes)
+- `apps-script/Code.gs`: one script bound to the "Reach Desk Outbox" sheet. Each inbox runs `installSender()` once → sends from itself every 15 min inside the window, daily cap (default 4, follow-ups count), starred first, one email per company domain per day, follow-ups day 3 / day 7 in the same thread, stops on reply / bounce / opt-out, do-not-email list, pause switch, reply notifications to Pankaj's main email.
+- Tested locally against a simulated Sheet + Gmail (21 checks pass: caps, window, no double sends, two inboxes never take the same lead, replies, opt-outs, out-of-office ignored, threading, weekends, pause).
+- `reach-desk.html`: Outbox URL + token in Keys; per lead "Email to send to" + star; "Queue this email" on each email draft; "Queue picked to outbox" for ticked rows; Outbox status box (sends left today, queue, follow-ups due, replies, per-inbox status, days to clear the queue).
+- Setup guide for Pankaj: `docs/SETUP-SENDING.md`.
+
 ## Next steps
-0. Pankaj: restrict the API key to YouTube Data API v3 only (Google Cloud Console > APIs & Services > Credentials).
-1. Pankaj tests on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe): do the numbers match YouTube? Do the insights match what he saw? Which drafts would he actually send?
-2. Tune thresholds/templates from that feedback (especially the guest-name detection).
-3. Step 4 = automated sending, per `docs/SPEC-SENDING.md` (sheet as queue + one Apps Script sender per Gmail inbox, follow-ups in thread, reply/bounce/opt-out detection). Waiting on Pankaj's answers to the open questions there.
-   - Note: Apollo would be a second external API; CLAUDE.md says "only YouTube Data API". Needs Pankaj's OK before 4d (CSV import/export doesn't need it).
-4. Backup button: download/restore notes + saved channels as a file (everything currently lives in one browser only).
+0. Pankaj: restrict the YouTube key (Google Cloud Console > APIs & Services > Credentials > API restrictions > YouTube Data API v3).
+1. Pankaj: follow `docs/SETUP-SENDING.md` with **one** inbox first, run `testSend`, then queue 1–2 leads to his own other addresses to see the first email + follow-up thread. Then add the other 4 inboxes.
+2. Pankaj tests insights on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe) and says which drafts he'd send.
+3. Tune thresholds/templates from that feedback (especially guest-name detection).
+4. Apollo CSV export/import for missing emails (free-plan friendly).
+5. Dashboard: reply rate by insight type / template. Optional generic-vs-insight test.
+6. Backup button (notes + saved channels to a file).
 
 ## Waiting on
-- Pankaj's real-key test.
+- Pankaj's real-key test and first inbox setup.

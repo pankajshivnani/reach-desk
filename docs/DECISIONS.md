@@ -16,3 +16,8 @@
 - **2026-10-13** — DMs follow the podcast-dm style: name a/b testing, mention trailer/chapters only when the data shows they're missing, mention edits/AI clips only when Pankaj ticks them, end with a Loom offer. Emails stay insight-only with no pitch (unchanged).
 - **2026-10-13** — "Guest name first" is detected by a rule of thumb (capitalised name before a separator, or "with Name"). Example titles are shown on the card so Pankaj can check it before sending.
 - **2026-10-13** — Video descriptions are no longer cached (chapters + contacts are worked out first), so far more channels fit in browser storage. Per-lead inputs (name, notes, ticks, chosen insight) are stored separately and never auto-deleted.
+- **2026-10-13** — Sending: Google Sheet as the queue + one Apps Script bound to it. Each of the 5 secondary Gmail inboxes installs its own timer and sends as itself. Free, runs with the laptop off. No Instantly/Smartlead for now. Pankaj's main Gmail never sends.
+- **2026-10-13** — Inboxes aren't assigned by the tool; the inbox with room claims the next queued lead. Over-selecting is fine, the queue just takes more days.
+- **2026-10-13** — Default 4 emails/inbox/day, follow-ups included; weekdays 9–17 in the sheet's time zone; follow-ups on business day 3 and 7 as replies in the same thread; one email per company domain per day; plain text only, no tracking.
+- **2026-10-13** — A lead with no host first name waits in the queue (setting `send_without_name` can change this). Bounces and "not interested" replies go to the do-not-email list automatically.
+- **2026-10-13** — Apollo: free plan, so emails are pasted into the lead by hand for now. No Apollo API.
