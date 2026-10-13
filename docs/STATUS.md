@@ -3,23 +3,26 @@
 **Last updated:** 2026-10-13
 
 ## Where we are
-- `prospect-finder-v5.html` committed untouched as the original.
-- `reach-desk.html` = v5 + **step 1: per-channel analysis** (built, tested with fake data; not yet tested with a real API key).
-  - "Analyse a channel" box: paste a link, @handle or channel ID. Also an "Analyse" button on every search result row.
-  - Pulls channel info + last 30 uploads (~3 units). Saved in the browser for 24h; "Saved" chips reopen for free; "Refresh" re-pulls.
-  - Shows: subs, long vs shorts (≤3 min), median views, days since last upload, avg gap, chapters on 20min+ videos, trailer yes/no, contacts (emails, LinkedIn, X, Instagram, sites), top 5 vs latest 5 thumbnails, full video table (sortable).
-  - Warns when fewer than 10 videos.
-  - Quota counter under the Keys box (counts calls from this browser only).
-- Opt-in "Remember key and sheet URL" tick box (saved in this browser only).
-- "Find prospects" shows its worst-case unit cost and asks before a run that would go over today's remaining quota.
+`reach-desk.html` = v5 search + a **lead panel** for every lead. Steps 1–3 of the spec are built and tested with fake data; **not yet tested with a real API key.** `prospect-finder-v5.html` stays as the untouched original.
+
+- **Find prospects** now pulls each kept channel's last 30 uploads in the same calls it already made (no extra units). Every row shows its **best insight** (sortable) and an **Open lead** button.
+- **Lead panel** (slides in from the right; Prev / Next to work through the list; Esc closes):
+  - Contacts found in descriptions.
+  - **Insight cards**: top 3 scored, rest under "more (use these in the Loom)". Weak ones marked "don't send"; "skip this lead" if nothing is strong.
+  - **Your inputs** (saved per channel): host first name, episode you watched, ticks for "clips look AI edited" / "best moments need proper edits", notes.
+  - **Drafts** for the chosen insight: up to 3 emails (no pitch), 3 DMs (podcast-dm style), reply pitch, day 3 / day 7 follow-ups, Loom notes. All editable, with copy buttons.
+  - Channel data: stats, top 5 vs latest 5 thumbnails, the video table (with a "vs nearby" column).
+- "Look up any channel" box for channels found elsewhere (about 3 units).
+- Opt-in "remember key"; quota counter; search cost warning.
+
+Insights detected: idea-first vs guest-name titles, what the top 5 share, titles over 60 chars, episode numbers up front, views dropping, hidden gem, topic winners, rising now, evergreen, shorts gap / shorts winning, length sweet spot, no chapters, no trailer, views after a posting break.
 
 ## Next steps
-0. Pankaj: restrict the API key to YouTube Data API v3 only in Google Cloud Console (APIs & Services > Credentials).
-1. Pankaj tests step 1 with his real key on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe). Check the numbers match YouTube.
-2. Build step 2: insight detection + scoring + cards (adjust views for video age).
-3. Build step 3: notes box, template drafts, reply pitch, Loom notes.
-4. Build step 4: sheet push with tracking columns.
-5. Compare tool insights with what Pankaj saw by hand on the 5 channels.
+0. Pankaj: restrict the API key to YouTube Data API v3 only (Google Cloud Console > APIs & Services > Credentials).
+1. Pankaj tests on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe): do the numbers match YouTube? Do the insights match what he saw? Which drafts would he actually send?
+2. Tune thresholds/templates from that feedback (especially the guest-name detection).
+3. Step 4: sheet push with tracking columns (insight used, sent date, follow-ups, replied, loom, call, paid).
+4. Backup button: download/restore notes + saved channels as a file (everything currently lives in one browser only).
 
 ## Waiting on
-- Pankaj's real-key test of step 1.
+- Pankaj's real-key test.

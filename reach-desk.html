@@ -43,7 +43,7 @@ button.chip.on{background:var(--signal);color:#fff;border-color:var(--signal)}
 .funnel .n{font-variant-numeric:tabular-nums;color:var(--hot)}
 .funnel .fix{font-size:11px;color:var(--signal);margin-top:10px;line-height:1.6;border-top:1px solid var(--rule);padding-top:9px}
 .tablewrap{overflow-x:auto;border:1px solid var(--rule);background:#fff}
-table{border-collapse:collapse;width:100%;font-size:13px;min-width:1320px}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:1480px}
 th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--ink);padding:9px 10px;white-space:nowrap;background:var(--panel);position:sticky;top:0}
 th.s{cursor:pointer}th.s:hover{color:var(--ink)}
 td{border-bottom:1px solid var(--rule);padding:9px 10px;vertical-align:top}
@@ -69,11 +69,32 @@ td a:hover{border-color:var(--ink)}
 .key td{border:none;padding:4px 12px 4px 0;vertical-align:top}
 .count{font-size:11px;color:var(--dim)}
 td button.chip{margin-top:6px;padding:4px 9px}
-.an{border:2px solid var(--ink);background:#fff;padding:18px;margin:0 0 14px;display:none}
-.an-head{display:flex;gap:14px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;border-bottom:1px solid var(--rule);padding-bottom:12px;margin-bottom:14px}
-.an-head h2{font-size:22px;letter-spacing:-.02em;line-height:1.1}
-.an-head h2 a{color:var(--ink);text-decoration:none}
-.an h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:400;margin:18px 0 8px}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(1000px,100%);background:var(--paper);border-left:2px solid var(--ink);overflow-y:auto;z-index:50;transform:translateX(105%);transition:transform .2s;padding:0 20px 80px;box-shadow:-12px 0 30px rgba(0,0,0,.12)}
+.drawer.open{transform:none}
+.dhead{position:sticky;top:0;background:var(--paper);display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;border-bottom:2px solid var(--ink);padding:16px 0 12px;margin-bottom:12px;z-index:2}
+.dhead h2{font-size:22px;letter-spacing:-.02em;line-height:1.1}
+.dhead h2 a{color:var(--ink);text-decoration:none}
+.dbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.dbtns button{padding:9px 14px}
+.drawer h3{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);font-weight:400;margin:20px 0 8px}
+.dimtxt{color:var(--dim)}
+.cards{display:grid;gap:8px}
+@media(min-width:780px){.cards{grid-template-columns:repeat(3,1fr)}}
+.card{display:block;border:1px solid var(--rule);background:#fff;padding:10px 12px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;color:var(--ink);margin:0}
+.card.on{border:2px solid var(--signal);background:#EFF4F0}
+.card.weak{opacity:.75}
+.card input{display:none}
+.ctop{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:5px}
+.ctext{display:block;font-size:12px;line-height:1.55;margin-bottom:4px}
+details summary{cursor:pointer;font-size:12px;color:var(--dim);margin:10px 0 8px}
+label.inl{display:inline;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink)}
+.drafts{display:grid;gap:8px}
+@media(min-width:780px){.drafts{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}}
+.draft{border:1px solid var(--rule);background:#fff;padding:8px}
+.draft textarea{min-height:120px;border:none;padding:4px;font-size:13px;line-height:1.6}
+.draft input{border:none;border-bottom:1px solid var(--rule);font-weight:700;padding:4px}
+.drow{display:flex;gap:8px;justify-content:space-between;align-items:center}
+.drow .chip{white-space:nowrap}
 .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
 .stat{border:1px solid var(--rule);background:var(--panel);padding:8px 10px}
 .stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
@@ -113,17 +134,16 @@ td button.chip{margin-top:6px;padding:4px 9px}
 </fieldset>
 
 <fieldset>
-  <legend>Analyse a channel</legend>
+  <legend>Look up any channel</legend>
   <div class="grid g2">
     <div><label for="chin">Channel link, @handle or ID</label><input id="chin" type="text" placeholder="https://www.youtube.com/@AIIsland  or  @AIIsland  or  UC..."></div>
-    <div style="display:flex;align-items:flex-end;gap:10px"><button id="anrun">Analyse</button></div>
+    <div style="display:flex;align-items:flex-end;gap:10px"><button id="anrun">Open lead</button></div>
   </div>
-  <p class="hint">Costs about 3 units (out of 10,000 a day). Saved for 24 hours, so opening it again is free. A plain name (not a link or @handle) costs 100 units, because it needs a search.</p>
+  <p class="hint">For channels you found elsewhere. Leads from Find prospects already have this, free. Costs about 3 units. Saved for 24 hours, so opening again is free. A plain name (not a link or @handle) costs 100 units, because it needs a search.</p>
   <div class="cached" id="cachedlist"></div>
 </fieldset>
 
 <div id="anstatus" class="status" style="display:none"></div>
-<section class="an" id="analysis"></section>
 
 <fieldset>
   <legend>Niche</legend>
@@ -203,14 +223,14 @@ td button.chip{margin-top:6px;padding:4px 9px}
   <table>
     <thead><tr>
       <th style="width:34px"><input type="checkbox" id="all"></th>
-      <th class="s" data-k="priority">Score</th><th>Verdict</th>
+      <th class="s" data-k="priority">Score</th><th>Verdict</th><th class="s" data-k="insScore">Best insight</th>
       <th class="s" data-k="fit">Fit</th><th class="s" data-k="budget">Budget</th><th class="s" data-k="gap">Gap</th>
       <th>Channel</th><th>Contact</th>
       <th class="s" data-k="subs">Subs</th><th class="s" data-k="longCount">Long</th>
       <th class="s" data-k="shortCount">Shorts</th><th class="s" data-k="avgViews">Avg views</th>
       <th class="s" data-k="moments">Moments</th>
     </tr></thead>
-    <tbody id="rows"><tr><td colspan="13" class="empty">Pick a niche, generate terms, hit Find prospects.</td></tr></tbody>
+    <tbody id="rows"><tr><td colspan="14" class="empty">Pick a niche, generate terms, hit Find prospects.</td></tr></tbody>
   </table>
 </div>
 
@@ -232,9 +252,11 @@ td button.chip{margin-top:6px;padding:4px 9px}
 
 </div>
 
+<aside class="drawer" id="drawer"></aside>
+
 <script>
 const $=id=>document.getElementById(id), API='https://www.googleapis.com/youtube/v3/';
-let results=[],stopped=false,sortKey='priority',sortDir=-1,picked=new Set();
+let leadOrder=[],results=[],stopped=false,sortKey='priority',sortDir=-1,picked=new Set();
 const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let seen=new Set(store.get('pf_seen',[])), usedCombos=new Set(store.get('pf_combos',[]));
 const saveSeen=()=>store.set('pf_seen',[...seen]), saveCombos=()=>store.set('pf_combos',[...usedCombos]);
@@ -368,13 +390,16 @@ function fmt(n){return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'
 function cls(n){return n>=70?'p-hot':n>=45?'p-warm':'p-cold';}
 
 function render(){var tb=$('rows');
- if(!results.length){tb.innerHTML='<tr><td colspan="13" class="empty">Nothing survived. Read the funnel above - it names the filter that ate them.</td></tr>';return;}
+ if(!results.length){tb.innerHTML='<tr><td colspan="14" class="empty">Nothing survived. Read the funnel above - it names the filter that ate them.</td></tr>';return;}
  var sorted=results.slice().sort(function(a,b){return (a[sortKey]-b[sortKey])*sortDir});
  tb.innerHTML=sorted.map(function(c){var vv=verdict(c);
   return '<tr class="'+(picked.has(c.id)?'picked':'')+'">'
   +'<td><input type="checkbox" data-id="'+c.id+'" '+(picked.has(c.id)?'checked':'')+'></td>'
   +'<td><span class="pill '+cls(c.priority)+'">'+c.priority+'</span></td>'
   +'<td><span class="verdict '+vv[1]+'">'+vv[0]+'</span><span class="tag">'+vv[2]+'</span></td>'
+  +'<td style="max-width:260px">'+(c.best?(c.best.send?'<b>'+esc(c.best.label)+'</b><span class="tag">score '+c.best.score+'</span>'
+     :'<span class="tag">nothing strong. skip lead</span>'):'<span class="tag">-</span>')
+   +'<button class="chip" data-an="'+c.id+'">Open lead</button></td>'
   +'<td><span class="pill '+(c.fit>=55?'p-fit':'p-cold')+'">'+c.fit+'</span></td>'
   +'<td><span class="pill '+(c.budget>=55?'p-cash':'p-cold')+'">'+c.budget+'</span></td>'
   +'<td><span class="pill '+cls(c.gap)+'">'+c.gap+'</span></td>'
@@ -382,7 +407,7 @@ function render(){var tb=$('rows');
    +'<span class="tag">'+esc(c.country||'-')+'</span>'
    +(c.hits.length?'<span class="hits">'+esc(c.hits.join(' \u00b7 '))+'</span>':'')
    +(c.flags.length?'<span class="flags">'+esc(c.flags.join(' \u00b7 '))+'</span>':'')
-   +'<button class="chip" data-an="'+c.id+'">Analyse</button></td>'
+   +'</td>'
   +'<td class="mail">'+(c.email?esc(c.email):'<span class="tag">no email</span>')
    +(c.ig?'<span class="tag">IG @'+esc(c.ig)+'</span>':'')
    +(c.site?'<span class="tag">'+esc(c.site.replace(/^https?:\/\/(www\.)?/,'').split('/')[0])+'</span>':'')+'</td>'
@@ -395,7 +420,8 @@ function render(){var tb=$('rows');
   if(cb.checked)picked.add(cb.dataset.id);else picked.delete(cb.dataset.id);
   cb.closest('tr').classList.toggle('picked',cb.checked);
   $('push').disabled=!picked.size||!$('sheet').value.trim();};});
- tb.querySelectorAll('[data-an]').forEach(function(b){b.onclick=function(){analyse(b.dataset.an);};});}
+ leadOrder=sorted.map(function(c){return c.id});
+ tb.querySelectorAll('[data-an]').forEach(function(b){b.onclick=function(){analyse(b.dataset.an,false,leadOrder);};});}
 
 $('all').onchange=function(e){results.forEach(function(c){
   if(e.target.checked)picked.add(c.id);else picked.delete(c.id)});
@@ -463,7 +489,7 @@ $('run').onclick=async function(){
   say('Found '+ids.size+'. Analysing '+list.length+'...');
   var chans=[];
   for(var i=0;i<list.length;i+=50){
-   var rc=await api('channels',{part:'snippet,statistics,contentDetails',id:list.slice(i,i+50).join(',')},key);
+   var rc=await api('channels',{part:'snippet,statistics,contentDetails,brandingSettings',id:list.slice(i,i+50).join(',')},key);
    chans=chans.concat(rc.items||[]);}
 
   for(var ci=0;ci<chans.length;ci++){
@@ -478,17 +504,18 @@ $('run').onclick=async function(){
 
    var pl=ch.contentDetails&&ch.contentDetails.relatedPlaylists&&ch.contentDetails.relatedPlaylists.uploads;
    if(!pl){d.novids++;continue;}
-   var vids=[];
+   var vids=[],allIds=[];
    try{var p=await api('playlistItems',{part:'contentDetails',playlistId:pl,maxResults:50},key);
+    allIds=(p.items||[]).map(function(v){return v.contentDetails.videoId});
     vids=(p.items||[]).filter(function(v){return v.contentDetails.videoPublishedAt>=after})
       .map(function(v){return v.contentDetails.videoId});
    }catch(e){d.novids++;continue;}
    if(!vids.length){d.novids++;continue;}
 
-   var details=[];
-   for(var vi=0;vi<vids.length;vi+=50){
-    var dd=await api('videos',{part:'contentDetails,statistics,snippet',id:vids.slice(vi,vi+50).join(',')},key);
-    details=details.concat(dd.items||[]);}
+   // One call for all recent uploads (same 1 unit): scoring uses the look-back window, lead analysis uses the latest 30
+   var dd=await api('videos',{part:'contentDetails,statistics,snippet',id:allIds.slice(0,50).join(',')},key);
+   var detailsAll=dd.items||[];
+   var details=detailsAll.filter(function(v){return v.snippet.publishedAt>=after});
 
    var longCount=0,shortCount=0,longSecs=0,longViews=[],lastUpload=0,sponsored=false,vtext='',vtitles='';
    details.forEach(function(v){var s=dur(v.contentDetails.duration);
@@ -516,6 +543,8 @@ $('run').onclick=async function(){
    c.budget=budgetScore(c,favourFirms); c.gap=gapScore(c);
    c.priority=Math.round(c.fit*0.28+c.budget*0.40+c.gap*0.32);
    if(c.budget<minBudget){d.budget++;continue;}
+   var cd=buildChannel(ch,detailsAll); saveChannel(cd);
+   var ins=insightsFor(cd); c.best=ins.best; c.insScore=ins.best&&ins.best.send?ins.best.score:0;
    d.kept++; results.push(c); render();}
 
   saveSeen(); refreshSeen(); showFunnel(d);
@@ -583,8 +612,8 @@ REM.forEach(function(id){$(id).addEventListener('input',saveRemembered);});
 $('remember').onchange=function(){store.set('rd_remember',this.checked);
  if(this.checked)saveRemembered();else REM.forEach(function(id){try{localStorage.removeItem('rd_'+id);}catch(e){}});};
 
-/* ---------- Step 1: per-channel analysis ---------- */
-var N_VIDS=30, CACHE_MS=24*3600000, CK='rd_chan_';
+/* ---------- Channel data (shared by search and lookup) ---------- */
+var N_VIDS=30, CACHE_MS=24*3600000, CK='rd_chan_', DAY=86400000;
 function sayA(m,k){var s=$('anstatus');s.style.display=m?'block':'none';s.textContent=m||'';s.className='status'+(k?' '+k:'');}
 
 function parseChannel(s){s=s.trim();var m;
@@ -620,6 +649,22 @@ function extractAll(t){t=t||'';
    return !/youtube|youtu\.be|instagram|twitter|x\.com|linkedin|facebook|tiktok|linktr|beacons|bio\.link|discord|patreon|spotify|apple\.com|amzn|amazon|bit\.ly|goo\.gl/i.test(u)})
    .map(function(u){return u.replace(/^https?:\/\/(www\.)?/,'').split('/')[0].toLowerCase()})).slice(0,6)};}
 
+/* Turn raw API objects into the compact record we cache and analyse */
+function buildChannel(ch,raw){
+ var all=ch.snippet.description||'';
+ var videos=raw.filter(function(v){return (v.snippet.liveBroadcastContent||'none')==='none'}).map(function(v){
+  var s=v.statistics||{}, secs=dur(v.contentDetails.duration), de=v.snippet.description||'', th=v.snippet.thumbnails||{};
+  all+='\n'+de;
+  return{id:v.id,title:v.snippet.title||'',published:v.snippet.publishedAt,secs:secs,short:secs<=180,
+   views:+(s.viewCount||0),likes:s.likeCount==null?null:+s.likeCount,comments:s.commentCount==null?null:+s.commentCount,
+   chapters:hasChapters(de),thumb:(th.medium||th.high||th.default||{}).url||''};});
+ videos.sort(function(a,b){return b.published<a.published?-1:1}); videos=videos.slice(0,N_VIDS);
+ var st=ch.statistics||{}, bs=(ch.brandingSettings&&ch.brandingSettings.channel)||{};
+ return{id:ch.id,title:ch.snippet.title,handle:ch.snippet.customUrl||'',
+  country:ch.snippet.country||'',created:ch.snippet.publishedAt,
+  subs:st.hiddenSubscriberCount?null:+(st.subscriberCount||0),totalVideos:+(st.videoCount||0),
+  trailer:bs.unsubscribedTrailer||'',contacts:extractAll(all),videos:videos,fetchedAt:Date.now()};}
+
 async function fetchChannel(id,key){
  var r=await api('channels',{part:'snippet,statistics,contentDetails,brandingSettings',id:id},key);
  var ch=(r.items||[])[0]; if(!ch)throw new Error('Channel not found.');
@@ -627,38 +672,29 @@ async function fetchChannel(id,key){
  if(pl){try{var p=await api('playlistItems',{part:'contentDetails',playlistId:pl,maxResults:N_VIDS},key);
   ids=(p.items||[]).map(function(v){return v.contentDetails.videoId});}catch(e){}}
  var raw=[]; if(ids.length){var d=await api('videos',{part:'snippet,contentDetails,statistics',id:ids.join(',')},key);raw=d.items||[];}
- var all=ch.snippet.description||'';
- var videos=raw.filter(function(v){return (v.snippet.liveBroadcastContent||'none')==='none'}).map(function(v){
-  var s=v.statistics||{}, secs=dur(v.contentDetails.duration), de=v.snippet.description||'', th=v.snippet.thumbnails||{};
-  all+='\n'+de;
-  return{id:v.id,title:v.snippet.title||'',published:v.snippet.publishedAt,secs:secs,short:secs<=180,
-   views:+(s.viewCount||0),likes:s.likeCount==null?null:+s.likeCount,comments:s.commentCount==null?null:+s.commentCount,
-   chapters:hasChapters(de),desc:de.slice(0,500),thumb:(th.medium||th.high||th.default||{}).url||''};});
- videos.sort(function(a,b){return b.published<a.published?-1:1});
- var st=ch.statistics||{}, bs=(ch.brandingSettings&&ch.brandingSettings.channel)||{};
- return{id:ch.id,title:ch.snippet.title,handle:ch.snippet.customUrl||'',desc:ch.snippet.description||'',
-  country:ch.snippet.country||'',created:ch.snippet.publishedAt,
-  subs:st.hiddenSubscriberCount?null:+(st.subscriberCount||0),totalVideos:+(st.videoCount||0),totalViews:+(st.viewCount||0),
-  trailer:bs.unsubscribedTrailer||'',keywords:bs.keywords||'',
-  contacts:extractAll(all),videos:videos,fetchedAt:Date.now()};}
+ return buildChannel(ch,raw);}
 
 function cacheIndex(){return store.get('rd_chan_index',[]);}
 function saveChannel(c){
  var idx=cacheIndex().filter(function(x){return x.id!==c.id});
  idx.unshift({id:c.id,title:c.title,fetchedAt:c.fetchedAt});
- for(var tries=0;tries<20;tries++){
+ for(var tries=0;tries<30;tries++){
   try{localStorage.setItem(CK+c.id,JSON.stringify(c));break;}
   catch(e){var old=idx.pop(); if(!old||old.id===c.id)break; localStorage.removeItem(CK+old.id);}}
  store.set('rd_chan_index',idx); showCached();}
 function loadChannel(id){return store.get(CK+id,null);}
 
 function showCached(){var idx=cacheIndex().slice(0,15);
- $('cachedlist').innerHTML=idx.length?'<span class="count" style="align-self:center">Saved:</span>'+idx.map(function(x){
+ $('cachedlist').innerHTML=idx.length?'<span class="count" style="align-self:center">Recent:</span>'+idx.map(function(x){
   return '<button class="chip" data-c="'+esc(x.id)+'">'+esc(x.title)+'</button>'}).join(''):'';
  $('cachedlist').querySelectorAll('[data-c]').forEach(function(b){b.onclick=function(){analyse(b.dataset.c);};});}
 showCached();
 
-async function analyse(input,force){
+/* Per-lead inputs Pankaj types (kept forever, separate from the 24h data cache) */
+function leadGet(id){return Object.assign({name:'',ep:'',ai:false,edits:false,notes:'',pick:''},store.get('rd_lead_'+id,{}));}
+function leadSet(id,o){store.set('rd_lead_'+id,o);}
+
+async function analyse(input,force,order){
  input=String(input||'').trim(); if(!input)return sayA('Paste a channel link or @handle first.','bad');
  var key=$('key').value.trim();
  try{
@@ -670,86 +706,404 @@ async function analyse(input,force){
    var id=await resolveChannel(input,key);
    if(!force){c=loadChannel(id); if(c&&Date.now()-c.fetchedAt>CACHE_MS)c=null;}
    if(!c){c=await fetchChannel(id,key); saveChannel(c);}}
-  sayA(''); showAnalysis(c);
- }catch(e){sayA(e.message,'bad');}}
+  sayA(''); openLead(c,order||null);
+ }catch(e){if($('drawer').classList.contains('open'))alert(e.message);else sayA(e.message,'bad');}}
 $('anrun').onclick=function(){analyse($('chin').value);};
 $('chin').onkeydown=function(e){if(e.key==='Enter')analyse($('chin').value);};
 
+/* ---------- Step 2: insight detection + scoring ---------- */
 function median(a){if(!a.length)return 0;var s=a.slice().sort(function(x,y){return x-y}),m=s.length>>1;
- return s.length%2?s[m]:Math.round((s[m-1]+s[m])/2);}
+ return s.length%2?s[m]:(s[m-1]+s[m])/2;}
+function age(v){return (Date.now()-new Date(v.published))/DAY;}
+function xf(r){return r<2?r.toFixed(1)+'x':Math.round(r)+'x';}
+function num(n){return Math.round(n).toLocaleString('en-US');}
+function eng(v){if(!v.views||(v.likes==null&&v.comments==null))return null;return ((v.likes||0)+(v.comments||0))/v.views;}
+
+var EP_RE=/^\s*(?:#\s?\d+|ep(?:isode)?\.?\s*#?\s?\d+|e\d+\b|\d{1,4}\s*[:|.\-–—])/i;
+var NOT_NAME=new Set(('the a an how why what when where who which is are do does can should will would this that these those your you my our we i it in on of for to and '
+ +'with from inside building investing startup startups ai vc ep episode part live full new top best future most every venture capital private equity market markets '
+ +'money crypto founder founders fund funds growth sales marketing product business finance tech data explained guide lessons secrets strategy deep dive real estate '
+ +'interview podcast show news update weekly monthly special bonus q&a qa ask me anything panel keynote').split(' '));
+function isName(h){var w=h.trim().split(/\s+/);
+ if(w.length<2||w.length>4||h.length>35)return false;
+ return w.every(function(x){return /^[A-Z][A-Za-z'’.\-]*$/.test(x)&&!NOT_NAME.has(x.toLowerCase().replace(/[.']/g,''))});}
+function titleHead(t){return t.replace(EP_RE,'').replace(/^[\s|:\-–—#.]+/,'');}
+function guestFirst(t){var s=titleHead(t);
+ if(/^(with|ft\.?|feat\.?)\s+[A-Z]/i.test(s))return true;
+ var head=s.split(/\s[|\-–—:]\s|[|:–—]/)[0].trim(), m=head.match(/^(.+?)\s+on\s+/);
+ return isName(head)||!!(m&&isName(m[1]));}
+var FEATS=[
+ ['question','ask a question in the title',function(t){return /\?/.test(t)}],
+ ['number','have a number in the title',function(t){return /\d/.test(titleHead(t))}],
+ ['epnum','start with the episode number',function(t){return EP_RE.test(t)}],
+ ['longtitle','have titles over 60 characters',function(t){return t.length>60}],
+ ['guest','lead with the guest\'s name',guestFirst]];
+var STOPW=new Set(('this that with from your what when where which their there about into have will would should could just like more most than then they them were been being does dont '
+ +'episode podcast interview full live part video show talk talks talking chat ft feat with the and for how why who new best top ways things thing need know make made '
+ +'2019 2020 2021 2022 2023 2024 2025 2026 2027').split(' '));
+
+function prep(c){
+ var vids=c.videos.slice(), longs=vids.filter(function(v){return !v.short}), shorts=vids.filter(function(v){return v.short});
+ // Fair comparison: each video vs the median of up to 4 uploads either side of it (similar age, similar channel size)
+ var settled=longs.filter(function(v){return age(v)>=7});
+ settled.forEach(function(v,i){var nb=[];
+  for(var j=Math.max(0,i-4);j<=Math.min(settled.length-1,i+4);j++)if(j!==i)nb.push(settled[j].views);
+  var b=median(nb); v.r=b>0?v.views/b:null;});
+ return{vids:vids,longs:longs,shorts:shorts,settled:settled.filter(function(v){return v.r!=null})};}
+function medR(list){return median(list.map(function(v){return v.r}));}
+
+function insightsFor(c){
+ var P=prep(c), S=P.settled, out=[], thin=S.length<10;
+ function add(o){ // o: type,label,text,ratio,send,why,s(surprise),e(easy),g(goal),f(facts),ex(example titles)
+  if(thin&&o.compare){o.send=false;o.why='fewer than 10 long videos a week+ old';}
+  var proof=o.ratio?Math.min(30,Math.round((o.ratio-1)*12)):12;
+  o.score=Math.max(0,Math.round(o.s*10+o.e*7+o.g*8+proof-(o.send?0:40))); out.push(o);}
+
+ // 1. idea-led vs guest-name-first titles
+ var G=S.filter(function(v){return guestFirst(v.title)}), I=S.filter(function(v){return !guestFirst(v.title)});
+ if(G.length>=3&&I.length>=3){var mg=medR(G), mi=medR(I), last10=P.longs.slice(0,10), k10=last10.filter(function(v){return guestFirst(v.title)}).length;
+  if(mg>0&&mi/mg>=1.3)add({type:'ideaFirst',compare:1,label:'Idea-first titles beat guest-name titles',ratio:mi/mg,send:mi/mg>=2,why:'gap under 2x',
+   text:'Titles that lead with the idea get '+xf(mi/mg)+' the views of titles that lead with the guest\'s name ('+I.length+' vs '+G.length+' videos). '+k10+' of the last '+last10.length+' lead with the name.',
+   s:3,e:3,g:3,f:{x:xf(mi/mg),k10:k10,n10:last10.length},ex:G.slice(0,2).concat(I.slice(0,2)).map(function(v){return v.title})});
+  else if(mi>0&&mg/mi>=1.3)add({type:'guestFirst',compare:1,label:'Guest-name titles beat the rest',ratio:mg/mi,send:mg/mi>=2,why:'gap under 2x',
+   text:'Titles that lead with the guest\'s name get '+xf(mg/mi)+' the views of the others ('+G.length+' vs '+I.length+' videos).',
+   s:2,e:3,g:3,f:{x:xf(mg/mi)},ex:G.slice(0,3).map(function(v){return v.title})});}
+
+ // 2. what the top 5 share
+ if(S.length>=8){var top=S.slice().sort(function(a,b){return b.r-a.r}), t5=top.slice(0,5), rest=top.slice(5), best=null;
+  FEATS.forEach(function(F){if(F[0]==='guest'&&out.some(function(o){return /First$/.test(o.type)}))return;
+   var k=t5.filter(function(v){return F[2](v.title)}).length, j=rest.filter(function(v){return F[2](v.title)}).length, sh=j/rest.length;
+   var cand=null;
+   if(k>=4&&sh<=0.4)cand={dir:'has',k:k,j:j,m:rest.length,ratio:(k/5)/Math.max(sh,0.05),send:sh<=0.35};
+   else if(k<=1&&sh>=0.6)cand={dir:'lacks',k:k,j:j,m:rest.length,ratio:sh/Math.max(k/5,0.05),send:sh>=0.65};
+   if(cand&&(!best||cand.ratio>best.ratio)){cand.F=F;best=cand;}});
+  if(best)add({type:best.dir==='has'?'top5has':'top5lacks',compare:1,label:'What your top 5 share',ratio:Math.min(best.ratio,4),send:best.send,why:'pattern not clear enough',
+   text:(best.dir==='has'?best.k+' of the top 5 videos '+best.F[1]+'. Only '+best.j+' of the other '+best.m+' do.'
+    :(best.k?'Only '+best.k+' of':'None of')+' the top 5 videos '+best.F[1]+', but '+best.j+' of the other '+best.m+' do.'),
+   s:3,e:3,g:3,f:{k:best.k,j:best.j,m:best.m,feat:best.F[1]},ex:t5.map(function(v){return v.title})});}
+
+ // 3. titles cut off on mobile
+ var L=P.longs.slice(0,20), kl=L.filter(function(v){return v.title.length>60}).length;
+ if(L.length>=8&&kl/L.length>=0.5)add({type:'longTitles',label:'Titles cut off on phones',send:true,
+  text:kl+' of the last '+L.length+' titles are over 60 characters, so phones cut off the end.',s:2,e:3,g:2,f:{k:kl,L:L.length},
+  ex:L.filter(function(v){return v.title.length>60}).slice(0,2).map(function(v){return v.title})});
+
+ // 4. episode numbers wasting the first words
+ var ke=L.filter(function(v){return EP_RE.test(v.title)}).length;
+ if(L.length>=8&&ke/L.length>=0.6)add({type:'epNumbers',label:'Episode numbers up front',send:true,
+  text:ke+' of the last '+L.length+' titles start with the episode number, which uses up the first words people see.',s:2,e:3,g:2,f:{k:ke,L:L.length},
+  ex:L.filter(function(v){return EP_RE.test(v.title)}).slice(0,2).map(function(v){return v.title})});
+
+ // 5. reach dropping (only videos 2+ weeks old; older ones had more time, so the bar is high)
+ var S14=P.longs.filter(function(v){return age(v)>=14}).slice(0,20);
+ if(S14.length>=12){var h=S14.length>>1, a=median(S14.slice(0,h).map(function(v){return v.views})), b=median(S14.slice(h,h*2).map(function(v){return v.views}));
+  if(a>0&&b/a>=1.7)add({type:'reachDrop',label:'Views dropping',ratio:b/a,send:b/a>=2.5,why:'drop under 2.5x (older videos had more time)',
+   text:'The last '+h+' episodes (2+ weeks old) got a median of '+num(a)+' views. The '+h+' before them got '+num(b)+'. Older ones had more time, so treat as rough.',
+   s:2,e:1,g:3,f:{n:h,a:num(a),b:num(b)}});}
+
+ // 6. hidden gem: loved by viewers, not clicked
+ var EV=S14.filter(function(v){return eng(v)!=null&&v.views>=50});
+ if(EV.length>=8){var me=median(EV.map(eng)), mv=median(EV.map(function(v){return v.views})), gem=null;
+  EV.forEach(function(v){var x=eng(v)/me; if(me>0&&x>=1.8&&v.views<=mv&&(!gem||x>gem.x))gem={v:v,x:x};});
+  if(gem){var gi=(gem.v.likes||0)+(gem.v.comments||0);
+   add({type:'hiddenGem',label:'Hidden gem to repackage',ratio:gem.x,send:gem.x>=2&&gi>=10,why:'too few likes/comments to be sure',
+    text:'"'+gem.v.title+'" got '+xf(gem.x)+' the usual likes+comments per view but only '+num(gem.v.views)+' views (typical: '+num(mv)+'). People who watched loved it; the title/thumbnail didn\'t pull them in.',
+    s:3,e:3,g:3,f:{t:gem.v.title,x:xf(gem.x),v:num(gem.v.views)},ex:[gem.v.title]});}}
+
+ // 7. topic winners
+ if(S.length>=8){var words={};
+  S.forEach(function(v){uniq((v.title.toLowerCase().match(/[a-z][a-z'\-]{3,}/g)||[])).forEach(function(w){
+   if(STOPW.has(w)||c.title.toLowerCase().indexOf(w)>=0)return; (words[w]=words[w]||[]).push(v);});});
+  var tw=null;
+  Object.keys(words).forEach(function(w){var W=words[w]; if(W.length<3||W.length>S.length/2)return;
+   var others=S.filter(function(v){return W.indexOf(v)<0}), x=medR(W)/medR(others);
+   if(x>=1.5&&(!tw||x>tw.x))tw={w:w,k:W.length,x:x,ex:W};});
+  if(tw)add({type:'topic',compare:1,label:'Topic that pulls views',ratio:tw.x,send:tw.x>=2,why:'gap under 2x',
+   text:'The '+tw.k+' videos with "'+tw.w+'" in the title get '+xf(tw.x)+' the views of the rest.',s:3,e:2,g:3,f:{w:tw.w,k:tw.k,x:xf(tw.x)},
+   ex:uniq(tw.ex.map(function(v){return v.title})).slice(0,3)});}
+
+ // 8. rising now
+ var older=P.longs.filter(function(v){var d=age(v);return d>=30&&d<=365}).map(function(v){return v.views});
+ if(older.length>=5){var mo=median(older), ris=null;
+  P.longs.forEach(function(v){var d=age(v); if(d>=1&&d<14&&v.views>=1.5*mo&&(!ris||v.views>ris.views))ris=v;});
+  if(ris&&mo>0)add({type:'rising',label:'Rising right now',ratio:ris.views/mo,send:true,
+   text:'"'+ris.title+'" has '+num(ris.views)+' views in '+Math.max(1,Math.floor(age(ris)))+' days. A typical episode ends up around '+num(mo)+'.',
+   s:2,e:2,g:3,f:{t:ris.title,v:num(ris.views),d:Math.max(1,Math.floor(age(ris))),m:num(mo)},ex:[ris.title]});}
+
+ // 9. evergreen
+ var allV=S14.map(function(v){return v.views}), mA=median(allV), ev=null;
+ S14.forEach(function(v){if(age(v)>=180&&mA>0&&v.views>=3*mA&&(!ev||v.views>ev.views))ev=v;});
+ if(ev&&allV.length>=8)add({type:'evergreen',label:'Old episode still on top',ratio:ev.views/mA,send:ev.views/mA>=3,
+  text:'"'+ev.title+'" ('+Math.round(age(ev)/30)+' months old) has '+num(ev.views)+' views, '+xf(ev.views/mA)+' a typical episode.',
+  s:1,e:2,g:2,f:{t:ev.title,v:num(ev.views),x:xf(ev.views/mA)},ex:[ev.title]});
+
+ // 10. shorts
+ if(P.vids.length>=10&&!P.shorts.length)add({type:'noShorts',label:'No shorts',send:true,
+  text:'None of the last '+P.vids.length+' uploads are shorts.',s:1,e:3,g:2,f:{n:P.vids.length}});
+ else if(P.shorts.length>=3&&P.longs.length>=5){var ms=median(P.shorts.map(function(v){return v.views})), ml=median(P.longs.map(function(v){return v.views}));
+  if(ml>0&&ms/ml>=1.5)add({type:'shortsWin',label:'Shorts beat full episodes',ratio:ms/ml,send:ms/ml>=2,why:'gap under 2x',
+   text:'Shorts get a median of '+num(ms)+' views vs '+num(ml)+' on full episodes.',s:2,e:2,g:2,f:{a:num(ms),b:num(ml)}});}
+
+ // 11. length sweet spot
+ var BK=[['under 20 min',0,1200],['20 to 45 min',1200,2700],['45 to 75 min',2700,4500],['75 min+',4500,1e9]], bb=null;
+ if(S.length>=10)BK.forEach(function(B){var inB=S.filter(function(v){return v.secs>=B[1]&&v.secs<B[2]}), outB=S.filter(function(v){return inB.indexOf(v)<0});
+  if(inB.length<3||outB.length<3)return; var x=medR(inB)/medR(outB); if(x>=1.5&&(!bb||x>bb.x))bb={b:B[0],x:x,k:inB.length};});
+ if(bb)add({type:'length',compare:1,label:'Length sweet spot',ratio:bb.x,send:bb.x>=2,why:'gap under 2x',
+  text:'Episodes '+bb.b+' get '+xf(bb.x)+' the views of the others ('+bb.k+' videos).',s:3,e:2,g:2,f:{b:bb.b,x:xf(bb.x),k:bb.k}});
+
+ // 12. chapters
+ var LT=P.longs.filter(function(v){return v.secs>=1200}), kc=LT.filter(function(v){return !v.chapters}).length;
+ if(LT.length>=5&&kc/LT.length>=0.8)add({type:'chapters',label:'No chapters',send:true,
+  text:kc+' of the last '+LT.length+' episodes over 20 min have no chapters.',s:2,e:3,g:2,f:{k:kc,L:LT.length}});
+
+ // 13. trailer
+ if(!c.trailer)add({type:'trailer',label:'No channel trailer',send:true,text:'No trailer is set for people who aren\'t subscribed yet.',s:1,e:3,g:1,f:{}});
+
+ // 14. posting gap
+ if(P.vids.length>=10){var gx=null;
+  for(var i=0;i<P.vids.length-1;i++){var g=(new Date(P.vids[i].published)-new Date(P.vids[i+1].published))/DAY; if(!gx||g>gx.g)gx={g:g,i:i};}
+  var gaps=[];for(var i2=0;i2<P.vids.length-1;i2++)gaps.push((new Date(P.vids[i2].published)-new Date(P.vids[i2+1].published))/DAY);
+  if(gx&&gx.g>=21&&gx.g>=3*median(gaps)){
+   var aft=P.vids.slice(0,gx.i+1).filter(function(v){return !v.short&&age(v)>=14}).slice(-5), bef=P.vids.slice(gx.i+1).filter(function(v){return !v.short}).slice(0,5);
+   if(aft.length>=3&&bef.length>=3){var ma=median(aft.map(function(v){return v.views})), mb=median(bef.map(function(v){return v.views}));
+    if(ma>0&&mb/ma>=1.5)add({type:'gap',label:'Views fell after a break',ratio:mb/ma,send:mb/ma>=2,why:'drop under 2x',
+     text:'After a '+Math.round(gx.g)+'-day break, episodes got a median of '+num(ma)+' views vs '+num(mb)+' before it.',
+     s:2,e:1,g:2,f:{g:Math.round(gx.g),a:num(ma),b:num(mb)}});}}}
+
+ out.sort(function(a,b){return b.score-a.score});
+ var best=out.filter(function(o){return o.send})[0]||out[0]||null;
+ return{list:out,best:best,thin:thin,P:P};}
+
+/* ---------- Step 3: drafts (templates only, filled with real numbers) ---------- */
+function hsh(s){var h=0;for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h);}
+function clean(t){return String(t).replace(/[–—]/g,'-').replace(/\s+/g,' ').trim();}
+function shortTitle(t){var s=clean(titleHead(t)); if(guestFirst(t)){var h=s.replace(/^(with|ft\.?|feat\.?)\s+/i,'').split(/\s[|\-:]\s|[|:]|\s+on\s+/)[0];return h.trim();}
+ s=s.split(/\s[|\-:]\s|[|:]/)[0].trim(); return s.length>45?s.slice(0,45).replace(/\s+\S*$/,''):s;}
+function q(t){return '"'+shortTitle(t)+'"';}
+
+var TPL={
+ ideaFirst:function(f){return{subj:['your title pattern','guest names vs ideas','your best titles'],
+  fact:['your titles that lead with the idea get about '+f.x+' the views of the ones that lead with the guest\'s name.',
+   'your idea-first titles pull about '+f.x+' the views of guest-name-first ones. '+f.k10+' of your last '+f.n10+' lead with the name.'],
+  test:['worth testing the idea first on the next few.','might be worth flipping the next 3 and seeing what happens.'],
+  dm:'your idea-first titles get about '+f.x+' the views of the guest-name ones.'};},
+ guestFirst:function(f){return{subj:['your title pattern','guest names in titles'],
+  fact:['your titles that lead with the guest\'s name get about '+f.x+' the views of the others.'],
+  test:['worth putting the name first on the next few.','worth testing that on every ep for a month.'],
+  dm:'your guest-name-first titles get about '+f.x+' the views of the rest.'};},
+ top5has:function(f){return{subj:['your top 5 videos','what your top 5 share'],
+  fact:[f.k+' of your top 5 videos '+f.feat+'. only '+f.j+' of the other '+f.m+' do.'],
+  test:['worth testing that on the next few titles.','easy one to a/b test.'],
+  dm:f.k+' of your top 5 videos '+f.feat+', only '+f.j+' of the other '+f.m+' do.'};},
+ top5lacks:function(f){return{subj:['your top 5 videos','what your top 5 skip'],
+  fact:[(f.k?'only '+f.k+' of':'none of')+' your top 5 videos '+f.feat+', but '+f.j+' of the other '+f.m+' do.'],
+  test:['worth dropping it on the next few and testing.','easy one to a/b test.'],
+  dm:(f.k?'only '+f.k+' of':'none of')+' your top 5 videos '+f.feat+', but '+f.j+' of the other '+f.m+' do.'};},
+ longTitles:function(f){return{subj:['your titles on mobile','titles getting cut off'],
+  fact:[f.k+' of your last '+f.L+' titles run past 60 characters, so phones cut off the end.'],
+  test:['worth testing shorter ones with the hook up front.','worth testing a few under 50.'],
+  dm:f.k+' of your last '+f.L+' titles get cut off on phones.'};},
+ epNumbers:function(f){return{subj:['your episode titles','the first words'],
+  fact:[f.k+' of your last '+f.L+' titles start with the episode number, which takes the first words people see.'],
+  test:['worth moving the number to the end and testing it.','worth testing a few with the hook first.'],
+  dm:f.k+' of your last '+f.L+' titles start with the episode number.'};},
+ reachDrop:function(f){return{subj:['your recent episodes','views on recent eps'],
+  fact:['your last '+f.n+' episodes got a median of '+f.a+' views. the '+f.n+' before them got '+f.b+'.'],
+  test:['worth a/b testing titles and thumbnails on the next few.','worth testing new packaging to see what brings it back.'],
+  dm:'your last '+f.n+' eps got a median of '+f.a+' views vs '+f.b+' before.'};},
+ hiddenGem:function(f){return{subj:['your hidden gem','one underrated episode'],
+  fact:[q(f.t)+' got '+f.x+' your usual likes and comments per view but only '+f.v+' views. people who watched loved it.'],
+  test:['worth a new title and thumbnail on that one.','worth repackaging it and seeing what happens.'],
+  dm:q(f.t)+' got '+f.x+' your usual likes and comments per view but only '+f.v+' views.'};},
+ topic:function(f){return{subj:['your '+f.w+' episodes','what pulls views'],
+  fact:['your '+f.k+' videos with "'+f.w+'" in the title get about '+f.x+' the views of the rest.'],
+  test:['worth leaning into that on the next few.','worth testing it up front in more titles.'],
+  dm:'your '+f.k+' videos with "'+f.w+'" in the title get about '+f.x+' the views of the rest.'};},
+ rising:function(f){return{subj:['your latest episode','this one is moving'],
+  fact:[q(f.t)+' has '+f.v+' views in '+f.d+' days. your usual episode ends up around '+f.m+'.'],
+  test:['worth cutting a few clips from it while it\'s moving.','worth testing a second thumbnail on it now.'],
+  dm:q(f.t)+' has '+f.v+' views in '+f.d+' days, your usual ep ends around '+f.m+'.'};},
+ evergreen:function(f){return{subj:['your top episode'],
+  fact:[q(f.t)+' has '+f.v+' views, about '+f.x+' your typical episode.'],
+  test:['worth a follow up on that topic.','worth testing a fresh thumbnail on it.'],
+  dm:q(f.t)+' has '+f.v+' views, about '+f.x+' your typical ep.'};},
+ noShorts:function(f){return{subj:['shorts from your eps'],
+  fact:['none of your last '+f.n+' uploads are shorts.'],
+  test:['worth testing a few cut from your best moments.','worth testing 3 from your next ep.'],
+  dm:'none of your last '+f.n+' uploads are shorts.'};},
+ shortsWin:function(f){return{subj:['your shorts'],
+  fact:['your shorts get a median of '+f.a+' views vs '+f.b+' on full episodes.'],
+  test:['worth using them to point people to the full ep.','worth testing more of them.'],
+  dm:'your shorts get a median of '+f.a+' views vs '+f.b+' on full eps.'};},
+ length:function(f){return{subj:['your episode length'],
+  fact:['your episodes '+f.b+' get about '+f.x+' the views of the others.'],
+  test:['worth testing a couple more at that length.','worth testing cut downs at that length.'],
+  dm:'your episodes '+f.b+' get about '+f.x+' the views of the others.'};},
+ chapters:function(f){return{subj:['chapters on your eps'],
+  fact:[f.k+' of your last '+f.L+' long episodes have no chapters.'],
+  test:['worth adding them and seeing if watch time moves.','easy one to test.'],
+  dm:f.k+' of your last '+f.L+' long eps have no chapters.'};},
+ trailer:function(f){return{subj:['your channel trailer'],
+  fact:['you don\'t have a channel trailer set for new visitors.'],
+  test:['worth testing a short one with your best moments.'],
+  dm:'there\'s no channel trailer for new visitors.'};},
+ gap:function(f){return{subj:['views after the break'],
+  fact:['after your '+f.g+'-day break, episodes got a median of '+f.a+' views vs '+f.b+' before it.'],
+  test:['worth testing new titles and thumbnails to win that back.'],
+  dm:'after your '+f.g+'-day break eps got a median of '+f.a+' views vs '+f.b+' before.'};}};
+
+function finish(t){return clean(t).replace(/ \n/g,'\n').toLowerCase();}
+function emailDrafts(c,ins,lead){
+ var T=TPL[ins.type](ins.f), h=hsh(c.id+ins.type), n=lead.name.trim()?' '+lead.name.trim():'', combos=[];
+ // every fact x test pair, starting at a different spot per channel so emails don't all look the same
+ T.fact.forEach(function(fa){T.test.forEach(function(te){combos.push(fa+' '+te);});});
+ return combos.map(function(_,i){return combos[(h+i)%combos.length]}).slice(0,3).map(function(mid,i){
+  return{subj:T.subj[(h+i)%T.subj.length],body:['hey'+n,'',mid,'','pankaj'].map(finish).join('\n')};});}
+function dmDrafts(c,ins,all,lead){
+ var T=TPL[ins.type](ins.f), n=lead.name.trim()?' '+lead.name.trim():'', ep=lead.ep?shortTitle(lead.ep):'', chan=clean(c.title);
+ var open1=ep?'hey'+n+' watched the '+ep+' ep.':'hey'+n+' came across '+chan+'.';
+ var open2=ep?'hey'+n+' caught the '+ep+' ep.':'hey'+n+' been going through '+chan+' on youtube.';
+ var asks=['a/b testing titles and thumbnails to see what actually gets people to click'];
+ if(!c.trailer)asks.push('a short trailer up front');
+ if(all.some(function(o){return o.type==='chapters'}))asks.push('chapter cuts');
+ if(lead.edits||lead.ai)asks.push('proper edits on the best moments for clips');
+ var askTxt=asks.length>1?asks.slice(0,-1).join(', ')+' and '+asks[asks.length-1]:asks[0];
+ var ai=lead.ai?' noticed your clips are ai edited, works for most of them.':'';
+ return[
+  open1+' '+T.dm+' feel more juice can be taken out of these.'+ai+' '+askTxt+'. can share a loom if you want',
+  open2+' feel a lot more juice can be taken out of these on youtube.'+ai+' '+askTxt+'. can share a loom explaining what i mean',
+  open1+' '+T.dm+' worth a/b testing titles and thumbnails on this. can share a loom if you want'
+ ].map(finish);}
+var REPLY='i do this for channels, a/b testing titles and thumbnails, clips, edits. found a few more things like this on yours, happy to share a loom.';
+var FOLLOW=['day 3: hey just checking if you saw this','day 7: all good if not interested. can still send the loom if you want'];
+
+/* ---------- Lead panel ---------- */
 function mmss(secs){var h=Math.floor(secs/3600),m=Math.floor(secs%3600/60),s=secs%60;
  return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(s).padStart(2,'0');}
-function ago(iso){var d=Math.floor((Date.now()-new Date(iso))/86400000);return d<1?'today':d===1?'1 day':d+' days';}
-function eng(v){if(!v.views||(v.likes==null&&v.comments==null))return null;return ((v.likes||0)+(v.comments||0))/v.views;}
-function n(v){return v==null?'<span class="tag">hidden</span>':v.toLocaleString();}
+function ago(iso){var d=Math.floor((Date.now()-new Date(iso))/DAY);return d<1?'today':d===1?'1 day':d+' days';}
+function nn(v){return v==null?'<span class="tag">hidden</span>':v.toLocaleString();}
+function copyText(t,btn){function done(){var o=btn.textContent;btn.textContent='Copied';setTimeout(function(){btn.textContent=o;},1200);}
+ if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(done,fallback);else fallback();
+ function fallback(){var ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();
+  try{document.execCommand('copy');done();}catch(e){}ta.remove();}}
 
-var anSort={k:'published',dir:-1};
-function showAnalysis(c,keep){
- var box=$('analysis'), vids=c.videos, longs=vids.filter(function(v){return !v.short}), shorts=vids.filter(function(v){return v.short});
- var gaps=[]; for(var i=0;i<vids.length-1;i++)gaps.push((new Date(vids[i].published)-new Date(vids[i+1].published))/86400000);
- var avgGap=gaps.length?Math.round(gaps.reduce(function(a,b){return a+b},0)/gaps.length):null;
- var longT=longs.filter(function(v){return v.secs>=1200});
- var pool=longs.length>=5?longs:vids, poolName=longs.length>=5?'long videos':'all videos (fewer than 5 long ones)';
- var top5=pool.slice().sort(function(a,b){return b.views-a.views}).slice(0,5), last5=pool.slice(0,5);
- var ct=c.contacts, hrs=Math.round((Date.now()-c.fetchedAt)/3600000);
+var cur=null, curOrder=[], anSort={k:'published',dir:-1};
+function openLead(c,order){cur=c; if(order)curOrder=order; else if(curOrder.indexOf(c.id)<0)curOrder=[c.id];
+ renderLead(); $('drawer').classList.add('open'); $('drawer').scrollTop=0; document.body.style.overflow='hidden';}
+function closeLead(){$('drawer').classList.remove('open'); document.body.style.overflow='';}
+function stepLead(d){var i=curOrder.indexOf(cur.id)+d; if(i<0||i>=curOrder.length)return; analyse(curOrder[i],false,curOrder);}
+document.addEventListener('keydown',function(e){if(e.key==='Escape'&&$('drawer').classList.contains('open'))closeLead();});
 
+function renderLead(){
+ var c=cur, R=insightsFor(c), L=leadGet(c.id), ins=R.list, P=R.P, vids=c.videos, ct=c.contacts;
+ var chosen=ins.filter(function(o){return o.type===L.pick})[0]||R.best;
+ var pos=curOrder.indexOf(c.id), row=results.filter(function(r){return r.id===c.id})[0], vv=row?verdict(row):null;
+ var hrs=Math.round((Date.now()-c.fetchedAt)/3600000), sendable=ins.filter(function(o){return o.send});
  function stat(val,label){return '<div class="stat"><b>'+val+'</b><span>'+label+'</span></div>';}
  function thumbRow(list){return '<div class="thumbs">'+list.map(function(v){
   return '<a href="https://www.youtube.com/watch?v='+esc(v.id)+'" target="_blank" rel="noopener"><img src="'+esc(v.thumb)+'" alt="" loading="lazy">'
    +'<span class="v">'+fmt(v.views)+'</span> &middot; '+esc(ago(v.published))+'<br>'+esc(v.title)+'</a>'}).join('')+'</div>';}
- function links(list,fn){return list.length?list.map(fn).join(' &middot; '):'<span class="tag" style="display:inline">none found</span>';}
-
+ function links(list,fn){return list.length?list.map(fn).join(' &middot; '):'<span class="dimtxt">none found</span>';}
+ var pool=P.longs.length>=5?P.longs:vids, poolName=P.longs.length>=5?'long videos':'all videos';
+ var top5=pool.slice().sort(function(a,b){return b.views-a.views}).slice(0,5), last5=pool.slice(0,5);
  var sorted=vids.slice().sort(function(a,b){var x=anSort.k==='eng'?eng(a):a[anSort.k],y=anSort.k==='eng'?eng(b):b[anSort.k];
   x=x==null?-1:x;y=y==null?-1:y;return (x<y?-1:x>y?1:0)*anSort.dir;});
+ var gaps=[];for(var i=0;i<vids.length-1;i++)gaps.push((new Date(vids[i].published)-new Date(vids[i+1].published))/DAY);
 
- box.innerHTML=
-  '<div class="an-head"><div><h2><a href="https://www.youtube.com/channel/'+esc(c.id)+'" target="_blank" rel="noopener">'+esc(c.title)+'</a></h2>'
-  +'<span class="tag">'+esc(c.handle||c.id)+' &middot; '+esc(c.country||'country not set')+' &middot; started '+esc(String(c.created).slice(0,4))
-  +' &middot; data from '+(hrs<1?'just now':hrs+'h ago')+'</span></div>'
-  +'<div class="bar" style="margin:0"><button class="ghost" id="anrefresh">Refresh (3 units)</button><button class="ghost" id="anclose">Close</button></div></div>'
-  +(vids.length<10?'<p class="status bad">Only '+vids.length+' videos. Too thin for insights - treat anything here as "don\'t send".</p>':'')
-  +'<div class="stats">'
-   +stat(c.subs==null?'hidden':fmt(c.subs),'subscribers')
-   +stat(c.totalVideos.toLocaleString(),'videos on channel')
-   +stat(vids.length,'videos pulled')
-   +stat(longs.length+' / '+shorts.length,'long / shorts (≤3 min)')
-   +stat(longs.length?fmt(median(longs.map(function(v){return v.views}))):'-','median views, long')
-   +stat(shorts.length?fmt(median(shorts.map(function(v){return v.views}))):'-','median views, shorts')
+ $('drawer').innerHTML=
+  '<div class="dhead"><div class="dtitle"><h2><a href="https://www.youtube.com/channel/'+esc(c.id)+'" target="_blank" rel="noopener">'+esc(c.title)+'</a></h2>'
+  +'<span class="tag">'+esc(c.handle||c.id)+' &middot; '+(c.subs==null?'subs hidden':fmt(c.subs)+' subs')+' &middot; '+esc(c.country||'country not set')
+  +' &middot; data from '+(hrs<1?'just now':hrs+'h ago')+(vv?' &middot; <b class="'+vv[1]+'">'+vv[0]+'</b>':'')+'</span></div>'
+  +'<div class="dbtns">'+(curOrder.length>1?'<button class="ghost" id="lprev" '+(pos<=0?'disabled':'')+'>&larr; Prev</button>'
+   +'<span class="count">'+(pos+1)+' / '+curOrder.length+'</span><button class="ghost" id="lnext" '+(pos>=curOrder.length-1?'disabled':'')+'>Next &rarr;</button>':'')
+  +'<button class="ghost" id="lref" title="Pull fresh data (about 3 units)">Refresh</button><button id="lclose">Close</button></div></div>'
+
+  +'<div class="contacts"><b>Email:</b> '+links(ct.emails,function(e){return esc(e)})
+   +' &nbsp; <b>LinkedIn:</b> '+links(ct.linkedin,function(u){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u.replace('https://www.linkedin.com/',''))+'</a>'})
+   +' &nbsp; <b>X:</b> '+links(ct.x,esc)+' &nbsp; <b>IG:</b> '+links(ct.instagram,esc)+' &nbsp; <b>Sites:</b> '+links(ct.sites,esc)
+   +'<span class="hint" style="display:block">Not in descriptions? Check the links on the channel\'s About page by hand.</span></div>'
+
+  +'<h3>Insights &mdash; pick one to use</h3>'
+  +(!sendable.length?'<p class="status bad">Skip this lead: nothing strong enough to send.'+(R.thin?' Fewer than 10 long videos to compare.':'')+'</p>':'')
+  +'<div class="cards">'+ins.slice(0,3).map(card).join('')+'</div>'
+  +(ins.length>3?'<details><summary>'+(ins.length-3)+' more (use these in the Loom)</summary><div class="cards">'+ins.slice(3).map(card).join('')+'</div></details>':'')
+  +(!ins.length?'<p class="hint">No patterns found in this data.</p>':'')
+
+  +'<h3>Your inputs</h3><div class="grid g2">'
+   +'<div><label for="lname">Host first name</label><input id="lname" value="'+esc(L.name)+'" placeholder="e.g. ted"></div>'
+   +'<div><label for="lep">Episode you watched (optional)</label><select id="lep"><option value="">(none)</option>'
+    +vids.map(function(v){return '<option value="'+esc(v.title)+'"'+(L.ep===v.title?' selected':'')+'>'+esc(v.title.slice(0,80))+'</option>'}).join('')+'</select></div></div>'
+   +'<p class="hint" style="margin-top:8px"><label class="inl"><input type="checkbox" id="lai"'+(L.ai?' checked':'')+'> clips look AI edited</label>'
+   +' &nbsp; <label class="inl"><input type="checkbox" id="ledits"'+(L.edits?' checked':'')+'> best moments need proper edits</label></p>'
+   +'<label for="lnotes" style="margin-top:10px">My notes (what you saw: edits, vibe, a moment)</label><textarea id="lnotes" style="min-height:70px">'+esc(L.notes)+'</textarea>'
+
+  +'<div id="drafts"></div>'
+
+  +'<h3>Channel data</h3><div class="stats">'
+   +stat(c.totalVideos.toLocaleString(),'videos on channel')+stat(vids.length,'videos pulled')
+   +stat(P.longs.length+' / '+P.shorts.length,'long / shorts (≤3 min)')
+   +stat(P.longs.length?fmt(Math.round(median(P.longs.map(function(v){return v.views})))):'-','median views, long')
+   +stat(P.shorts.length?fmt(Math.round(median(P.shorts.map(function(v){return v.views})))):'-','median views, shorts')
    +stat(vids.length?ago(vids[0].published):'-','since last upload')
-   +stat(avgGap==null?'-':avgGap+' days','avg gap between uploads')
-   +stat(longT.length?longT.filter(function(v){return v.chapters}).length+' / '+longT.length:'-','20min+ with chapters')
-   +stat(c.trailer?'yes':'<span class="warn">no</span>','channel trailer')
-  +'</div>'
-  +'<h3>Contacts found in descriptions</h3><div class="contacts">'
-   +'<b>Email:</b> '+links(ct.emails,function(e){return esc(e)})+'<br>'
-   +'<b>LinkedIn:</b> '+links(ct.linkedin,function(u){return '<a href="'+esc(u)+'" target="_blank" rel="noopener">'+esc(u.replace('https://www.linkedin.com/',''))+'</a>'})+'<br>'
-   +'<b>X:</b> '+links(ct.x,esc)+' &nbsp; <b>Instagram:</b> '+links(ct.instagram,esc)+'<br>'
-   +'<b>Sites:</b> '+links(ct.sites,esc)
-   +'<p class="hint">The links box on the channel\'s About page isn\'t available through the API. Check it by hand if nothing shows here.</p></div>'
-  +(pool.length?'<h3>Top 5 by views &mdash; '+esc(poolName)+'</h3>'+thumbRow(top5)+'<h3>Latest 5 &mdash; '+esc(poolName)+'</h3>'+thumbRow(last5)
-   +'<p class="hint">Views are lifetime totals, so older videos have had more time. Step 2 will adjust for age.</p>':'')
+   +stat(gaps.length?Math.round(gaps.reduce(function(a,b){return a+b},0)/gaps.length)+' days':'-','avg gap between uploads')
+   +stat(c.trailer?'yes':'<span class="warn">no</span>','channel trailer')+'</div>'
+  +(pool.length?'<h3>Top 5 by views &mdash; '+poolName+'</h3>'+thumbRow(top5)+'<h3>Latest 5 &mdash; '+poolName+'</h3>'+thumbRow(last5):'')
   +'<h3>Last '+vids.length+' uploads</h3><div class="tablewrap vt"><table><thead><tr>'
    +'<th></th><th>Title</th><th class="s" data-sk="published">Posted</th><th class="s" data-sk="secs">Length</th>'
-   +'<th class="s" data-sk="views">Views</th><th class="s" data-sk="likes">Likes</th><th class="s" data-sk="comments">Comments</th>'
+   +'<th class="s" data-sk="views">Views</th><th class="s" data-sk="r">vs nearby</th><th class="s" data-sk="likes">Likes</th><th class="s" data-sk="comments">Comments</th>'
    +'<th class="s" data-sk="eng">Likes+comments / views</th><th>Chapters</th></tr></thead><tbody>'
    +(sorted.length?sorted.map(function(v){var e=eng(v);
     return '<tr><td><a href="https://www.youtube.com/watch?v='+esc(v.id)+'" target="_blank" rel="noopener"><img src="'+esc(v.thumb)+'" alt="" loading="lazy"></a></td>'
      +'<td>'+esc(v.title)+'<span class="tag">'+v.title.length+' chars'+(v.title.length>60?' &middot; <span class="warn">cut off on mobile</span>':'')
-     +(v.short?' &middot; short':'')+'</span></td>'
+     +(v.short?' &middot; short':'')+(!v.short&&guestFirst(v.title)?' &middot; guest name first':'')+'</span></td>'
      +'<td class="num">'+esc(String(v.published).slice(0,10))+'<span class="tag">'+esc(ago(v.published))+'</span></td>'
      +'<td class="num">'+mmss(v.secs)+'</td><td class="num">'+v.views.toLocaleString()+'</td>'
-     +'<td class="num">'+n(v.likes)+'</td><td class="num">'+n(v.comments)+'</td>'
+     +'<td class="num">'+(v.r!=null&&!v.short?xf(v.r):'-')+'</td>'
+     +'<td class="num">'+nn(v.likes)+'</td><td class="num">'+nn(v.comments)+'</td>'
      +'<td class="num">'+(e==null?'-':(e*100).toFixed(1)+'%')+'</td>'
      +'<td>'+(v.short?'-':v.chapters?'yes':'no')+'</td></tr>'}).join('')
-    :'<tr><td colspan="9" class="empty">No public uploads found.</td></tr>')
-  +'</tbody></table></div>';
+    :'<tr><td colspan="10" class="empty">No public uploads found.</td></tr>')
+  +'</tbody></table></div><p class="hint">"vs nearby" = views compared with the 4 uploads either side of it (fair for age and channel size). 1.0x = normal. Videos under a week old are left out.</p>';
 
- box.style.display='block';
- $('anclose').onclick=function(){box.style.display='none';};
- $('anrefresh').onclick=function(){analyse(c.id,true);};
- box.querySelectorAll('th[data-sk]').forEach(function(th){th.onclick=function(){var k=th.dataset.sk;
-  if(anSort.k===k)anSort.dir*=-1;else{anSort.k=k;anSort.dir=-1;} showAnalysis(c,true);};});
- if(!keep)box.scrollIntoView({behavior:"smooth",block:"start"});}
+ function card(o){return '<label class="card'+(chosen===o?' on':'')+(o.send?'':' weak')+'"><input type="radio" name="pick" value="'+esc(o.type)+'"'+(chosen===o?' checked':'')+'>'
+  +'<span class="ctop"><b>'+esc(o.label)+'</b><span class="pill '+(o.send?cls(o.score):'p-cold')+'">'+o.score+'</span></span>'
+  +'<span class="ctext">'+esc(o.text)+'</span>'
+  +(o.send?'':'<span class="warn ctext">Don\'t send: '+esc(o.why||'weak')+'</span>')
+  +(o.ex&&o.ex.length?'<span class="tag" style="text-transform:none">e.g. '+o.ex.slice(0,3).map(function(t){return esc(t)}).join(' / ')+'</span>':'')+'</label>';}
+
+ var D=$('drawer');
+ $('lclose').onclick=closeLead; $('lref').onclick=function(){analyse(c.id,true,curOrder);};
+ if($('lprev')){$('lprev').onclick=function(){stepLead(-1);}; $('lnext').onclick=function(){stepLead(1);};}
+ D.querySelectorAll('input[name=pick]').forEach(function(r){r.onchange=function(){L.pick=r.value;leadSet(c.id,L);
+  D.querySelectorAll('.card').forEach(function(x){x.classList.toggle('on',x.querySelector('input').checked)}); drafts();};});
+ function bind(id,k,ev,val){$(id).addEventListener(ev,function(){L[k]=val($(id));leadSet(c.id,L);if(k!=='notes')drafts();});}
+ bind('lname','name','input',function(e){return e.value}); bind('lep','ep','change',function(e){return e.value});
+ bind('lai','ai','change',function(e){return e.checked}); bind('ledits','edits','change',function(e){return e.checked});
+ bind('lnotes','notes','input',function(e){return e.value});
+ D.querySelectorAll('th[data-sk]').forEach(function(th){th.onclick=function(){var k=th.dataset.sk,top=D.scrollTop;
+  if(anSort.k===k)anSort.dir*=-1;else{anSort.k=k;anSort.dir=-1;} renderLead(); D.scrollTop=top;};});
+
+ function drafts(){
+  var pick=ins.filter(function(o){return o.type===L.pick})[0]||R.best, box=$('drafts');
+  if(!pick){box.innerHTML='';return;}
+  var em=emailDrafts(c,pick,L), dm=dmDrafts(c,pick,ins,L);
+  var loom=ins.filter(function(o){return o!==pick}).map(function(o){return '- '+o.text+(o.send?'':' (weak)')});
+  if(L.ai)loom.push('- clips look ai edited: fine for most, the best moments need proper edits');
+  if(L.edits)loom.push('- best moments need proper edits');
+  if(L.notes.trim())loom.push('- my notes: '+L.notes.trim());
+  function blk(title,text,sub){return '<div class="draft">'+(sub!=null?'<div class="drow"><input value="'+esc(sub)+'"><button class="chip" data-cp="prev">Copy subject</button></div>':'')
+   +'<textarea>'+esc(text)+'</textarea><div class="drow"><span class="count">'+text.split(/\s+/).filter(Boolean).length+' words</span><button class="chip" data-cp="ta">Copy '+title+'</button></div></div>';}
+  box.innerHTML=(pick.send?'':'<p class="status bad">This insight is weak. Better not to send it.</p>')
+   +(!L.name.trim()?'<p class="hint warn">Add the host\'s first name above. Drafts say "hey" until you do.</p>':'')
+   +'<h3>Email &mdash; 3 versions (no pitch)</h3><div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj)}).join('')+'</div>'
+   +'<h3>DM &mdash; LinkedIn / X / IG</h3><div class="drafts">'+dm.map(function(t){return blk('DM',t)}).join('')+'</div>'
+   +'<h3>If they reply &mdash; pitch</h3><div class="drafts">'+blk('reply',REPLY)+'</div>'
+   +'<h3>Follow-ups</h3><div class="drafts">'+FOLLOW.map(function(t){return blk('follow-up',t.replace(/^day \d: /,''),null).replace('<div class="draft">','<div class="draft"><span class="tag">'+t.slice(0,5)+'</span>')}).join('')+'</div>'
+   +'<h3>Loom notes</h3><div class="drafts">'+blk('Loom notes',loom.length?loom.join('\n'):'- nothing else found')+'</div>';
+  box.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(){var d=b.closest('.draft'),
+   el=b.dataset.cp==='prev'?b.previousElementSibling:d.querySelector('textarea'); copyText(el.value,b);};});}
+ drafts();}
+
 </script>
 </body>
 </html>

@@ -11,3 +11,8 @@
 - **2026-10-13** — Shorts = 3 min or under (per spec; v5's search scoring still uses its own 65s rule).
 - **2026-10-13** — Key/sheet URL can be remembered in the browser, but only if Pankaj ticks the box (off by default).
 - **2026-10-13** — Search is the quota hog (100 units per page; a default run is up to ~3,800 units). The tool shows the cost before each run and warns when it won't fit. No extra API keys/projects to get around the limit (breaks YouTube's terms); if more is ever needed, apply for a quota increase.
+- **2026-10-13** — No separate "analyse" step for search leads: search already pulls each channel's uploads, so every kept lead gets insights + drafts for free. The lookup box is only for channels found elsewhere.
+- **2026-10-13** — Fair view comparisons: each long video vs the median of up to 4 uploads either side of it ("vs nearby"). Videos under a week old are left out. "Views dropping" needs 2.5x because older videos had more time.
+- **2026-10-13** — DMs follow the podcast-dm style: name a/b testing, mention trailer/chapters only when the data shows they're missing, mention edits/AI clips only when Pankaj ticks them, end with a Loom offer. Emails stay insight-only with no pitch (unchanged).
+- **2026-10-13** — "Guest name first" is detected by a rule of thumb (capitalised name before a separator, or "with Name"). Example titles are shown on the card so Pankaj can check it before sending.
+- **2026-10-13** — Video descriptions are no longer cached (chapters + contacts are worked out first), so far more channels fit in browser storage. Per-lead inputs (name, notes, ticks, chosen insight) are stored separately and never auto-deleted.
