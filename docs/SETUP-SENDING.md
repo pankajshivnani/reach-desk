@@ -6,7 +6,7 @@ You'll make one Google Sheet that holds the queue. Each of your 5 inboxes then c
 
 ## A. Make the sheet (logged into your main account)
 1. Open **sheets.new**. Name it **Reach Desk Outbox**.
-2. **File → Settings → Time zone**: pick the time zone your sending hours should follow (e.g. New York if you mostly email US people). Save.
+2. (Nothing to do here: `setup` sets the sheet to **US Eastern time**, so 9–17 means 9am–5pm New York, which is 6:30pm–2:30am India time. Change it in File → Settings if you ever need to.)
 3. **Extensions → Apps Script**. A code editor opens.
 4. Delete everything in it. Open `apps-script/Code.gs` from this repo, copy all of it, and paste it in. Click the project name at the top and call it **Reach Desk sender**. Press **Ctrl+S**.
 5. On the left, next to **Services**, click **+** → choose **Gmail API** → **Add**.
@@ -30,7 +30,7 @@ You'll make one Google Sheet that holds the queue. Each of your 5 inboxes then c
 6. The **Inboxes** tab now shows this address. In Reach Desk, **Refresh status** lists it too.
 
 ## C. Daily use
-1. Find prospects → open the leads worth it → type the host's first name and check the email (paste one from Apollo if none was found).
+1. Find prospects → open the leads worth it → check the email (paste one from Apollo if none was found) and the host's first name. Click a **Name ideas** chip if one is right (from the email or from "hosted by …" in their descriptions).
 2. Either click **Queue this email** on the version you like inside a lead, or tick several leads in the table and click **Queue picked to outbox** (uses each lead's best insight, first version).
 3. Done. The inboxes send weekdays inside your hours (default 9:00–17:00), starred leads first, a few hours apart. Follow-ups go out on day 3 and day 7 as replies in the same thread.
 4. When someone replies you get a note at your main email. Answer from that inbox using the reply pitch in Reach Desk.

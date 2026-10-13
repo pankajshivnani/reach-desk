@@ -21,3 +21,5 @@
 - **2026-10-13** — Default 4 emails/inbox/day, follow-ups included; weekdays 9–17 in the sheet's time zone; follow-ups on business day 3 and 7 as replies in the same thread; one email per company domain per day; plain text only, no tracking.
 - **2026-10-13** — A lead with no host first name waits in the queue (setting `send_without_name` can change this). Bounces and "not interested" replies go to the do-not-email list automatically.
 - **2026-10-13** — Apollo: free plan, so emails are pasted into the lead by hand for now. No Apollo API.
+- **2026-10-13** — Sending hours follow US Eastern time (setup sets the sheet time zone to America/New_York).
+- **2026-10-13** — Host names: the tool suggests names from the email (ted.smith@ → ted) and from "hosted by / your host / host: / my name is" in descriptions. Pankaj clicks to confirm. Bulk queueing only uses a name on its own when the email is clearly first.last@; otherwise the lead needs a typed name or waits.

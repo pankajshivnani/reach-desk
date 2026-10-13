@@ -672,7 +672,17 @@ function buildChannel(ch,raw){
  return{id:ch.id,title:ch.snippet.title,handle:ch.snippet.customUrl||'',
   country:ch.snippet.country||'',created:ch.snippet.publishedAt,
   subs:st.hiddenSubscriberCount?null:+(st.subscriberCount||0),totalVideos:+(st.videoCount||0),
-  trailer:bs.unsubscribedTrailer||'',contacts:extractAll(all),videos:videos,fetchedAt:Date.now()};}
+  trailer:bs.unsubscribedTrailer||'',contacts:extractAll(all),host:hostFromText(all),videos:videos,fetchedAt:Date.now()};}
+/* "hosted by Sarah Lee" / "your host, Sarah" / "host: Sarah" / "my name is Sarah" -> most frequent first name */
+function hostFromText(t){var re=/\b(?:[Hh]osted by|[Yy]our host,?(?: is)?|[Hh]ost:|[Mm]y name is)\s+([A-Z][a-z]{1,15})((?:\s+[A-Z][a-z'\-]+)?)/g,m,seen={},best=null;
+ while((m=re.exec(t))){var k=m[1];if(NOT_NAME.has(k.toLowerCase()))continue;seen[k]=seen[k]||{n:0,full:m[0]};seen[k].n++;
+  if(!best||seen[k].n>seen[best].n)best=k;}
+ return best?{name:best.toLowerCase(),from:seen[best].full}:null;}
+var GENERIC_LOCAL=/^(info|hello|hi|hey|contact|team|admin|support|podcast|press|media|office|mail|email|enquiries|inquiries|business|partner|partners|partnership|partnerships|sales|marketing|general|booking|bookings|collab|sponsor|sponsors|sponsorship|show|studio|noreply|no|feedback|editor|editorial|news|jobs|careers|investor|investors|ir|founder|founders|ops|help|youtube|content|creative|events|admissions|community)$/;
+/* ted.smith@ -> ted (sure); ted@ or tsmith@ -> suggestion only; info@ -> nothing */
+function nameFromEmail(e){var parts=String(e||'').split('@')[0].toLowerCase().split(/[._\-]+/).filter(Boolean);
+ if(!parts.length||GENERIC_LOCAL.test(parts[0])||!/^[a-z]{2,12}$/.test(parts[0]))return null;
+ return{name:parts[0],sure:parts.length>=2&&/^[a-z]{2,}$/.test(parts[1])};}
 
 async function fetchChannel(id,key){
  var r=await api('channels',{part:'snippet,statistics,contentDetails,brandingSettings',id:id},key);
@@ -1043,7 +1053,7 @@ function renderLead(){
    +'<div><label for="lemail">Email to send to</label><input id="lemail" list="lemails" value="'+esc(L.email||ct.emails[0]||'')+'" placeholder="from descriptions, Apollo or by hand">'
     +'<datalist id="lemails">'+ct.emails.map(function(e){return '<option value="'+esc(e)+'">'}).join('')+'</datalist></div>'
    +'<div style="align-self:end"><label class="inl"><input type="checkbox" id="lstar"'+(L.star?' checked':'')+'> ⭐ priority (sent first)</label>'
-    +'<span class="tag" id="lobst">'+esc(outboxLine(c.id))+'</span></div>'
+    +'<span class="tag" id="lobst">'+esc(outboxLine(c.id))+'</span></div></div><div class="chips" id="lsug"></div><div>'
    +'<div><label for="lep">Episode you watched (optional)</label><select id="lep"><option value="">(none)</option>'
     +vids.map(function(v){return '<option value="'+esc(v.title)+'"'+(L.ep===v.title?' selected':'')+'>'+esc(v.title.slice(0,80))+'</option>'}).join('')+'</select></div></div>'
    +'<p class="hint" style="margin-top:8px"><label class="inl"><input type="checkbox" id="lai"'+(L.ai?' checked':'')+'> clips look AI edited</label>'
@@ -1094,6 +1104,13 @@ function renderLead(){
  bind('lai','ai','change',function(e){return e.checked}); bind('ledits','edits','change',function(e){return e.checked});
  bind('lnotes','notes','input',function(e){return e.value});
  bind('lemail','email','input',function(e){return e.value.trim()}); bind('lstar','star','change',function(e){return e.checked});
+ function suggest(){var sg=[], fe=nameFromEmail($('lemail').value);
+  if(fe)sg.push([fe.name,'from email'+(fe.sure?'':' (check it)')]);
+  if(c.host&&!sg.some(function(x){return x[0]===c.host.name}))sg.push([c.host.name,'from "'+c.host.from+'"']);
+  $('lsug').innerHTML=sg.length&&!$('lname').value.trim()?'<span class="count" style="align-self:center">Name ideas:</span>'+sg.map(function(x){
+   return '<button class="chip" data-nm="'+esc(x[0])+'">use "'+esc(x[0])+'" <span class="dimtxt">'+esc(x[1])+'</span></button>'}).join(''):'';
+  $('lsug').querySelectorAll('[data-nm]').forEach(function(b){b.onclick=function(){$('lname').value=b.dataset.nm;$('lname').dispatchEvent(new Event('input'));};});}
+ $('lemail').addEventListener('input',suggest); $('lname').addEventListener('input',suggest); suggest();
  D.querySelectorAll('th[data-sk]').forEach(function(th){th.onclick=function(){var k=th.dataset.sk,top=D.scrollTop;
   if(anSort.k===k)anSort.dir*=-1;else{anSort.k=k;anSort.dir=-1;} renderLead(); D.scrollTop=top;};});
 
@@ -1132,6 +1149,8 @@ function obConf(){var u=$('outbox').value.trim(),t=$('otoken').value.trim();
  if(!u||!t)throw new Error('Add the Outbox web app URL and token in Keys first.');return{u:u,t:t};}
 function outboxLine(id){var s=obLeads[id];return s?'outbox: '+s.status+(s.inbox?' from '+s.inbox:''):'';}
 
+/* Name for bulk queueing: typed name, else only a clear first.last@ email */
+function autoName(c,L){if(L.name.trim())return L.name.trim();var fe=nameFromEmail(L.email||c.contacts.emails[0]);return fe&&fe.sure?fe.name:'';}
 function outboxRow(c,ins,L,subj,body){
  var email=(L.email||c.contacts.emails[0]||'').trim().toLowerCase();
  if(!email)return 'No email for this lead. Add one in "Email to send to" (from Apollo or by hand).';
@@ -1154,6 +1173,7 @@ $('queuebulk').onclick=async function(){
   if(!c)return skipped.push(name+': data expired, open the lead to reload it');
   var L=leadGet(id), R=insightsFor(c), ins=R.list.filter(function(o){return o.type===L.pick&&o.send})[0]||(R.best&&R.best.send?R.best:null);
   if(!ins)return skipped.push(name+': no strong insight (skip lead)');
+  L=Object.assign({},L,{name:autoName(c,L)});
   var e=emailDrafts(c,ins,L)[0], row=outboxRow(c,ins,L,e.subj,e.body);
   if(typeof row==='string')return skipped.push(name+': '+row);
   rows.push(row);});

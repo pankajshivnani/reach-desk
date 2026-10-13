@@ -26,6 +26,7 @@ var OPT_OUT = /\b(unsubscribe|not interested|no thanks|remove me|stop emailing|d
 /* ---------- One-time setup (sheet owner) ---------- */
 function setup() {
   var ss = SpreadsheetApp.getActive();
+  ss.setSpreadsheetTimeZone('America/New_York'); // sending hours follow US Eastern time (change in File > Settings)
   ensureTab(ss, TABS.out, COLS);
   ensureTab(ss, TABS.dne, ['email', 'reason', 'date']);
   ensureTab(ss, TABS.inb, ['inbox', 'cap', 'paused', 'added_at', 'last_run', 'last_error']);
