@@ -21,13 +21,13 @@ Local tool for Zizzy (Pankaj's agency) to find YouTube channels/podcasts, analyz
 - Build in small working steps. After each step: tell him how to open and test it, then commit and push.
 
 ## Email style (for the draft templates)
-- **First email = a short question, no stats** (decided 2026-10-14 after spam tests, see DECISIONS): "hey {name}, are you the one looking after the youtube side of {channel}?" + "noticed something in your last N episodes, happy to share if it's useful." ~30 words.
-- subject: 2–4 lowercase words about them ("{channel} on youtube")
-- all lowercase, raw, like typed on a phone. No links, no "i help", no services list, no call ask, no sales words ("scale", "leverage", "quick call", "hope this finds you well").
-- sign off: "pankaj shivnani" / "zizzy" on the first email (real identity); "pankaj" in replies.
-- **When they reply:** one fact with a number from their channel + one test to try, offer a loom.
-- Pitch only after that.
-- One follow-up only (day 3). Deliverability first: if in doubt, send less.
+- **Pankaj's own voice** (decided 2026-10-14, from the podcast emails he actually sent; see DECISIONS): "hey {name}, watched the {guest} ep. {something he genuinely liked}. feel a lot more juice can be taken out of these episodes." + one fact with a number from their channel + what to do (a/b testing titles and thumbnails; trailer / chapter cuts only if the data shows they're missing; proper edits on the banger moments only if he ticked it) + "can share a loom if you want :)" + "cheers, / pankaj".
+- all lowercase, raw, like typed on a phone. No links, no services list, no call ask, no sales words ("scale", "leverage", "quick call", "hope this finds you well"). No "i help" in the first email.
+- Never invent: "watched the X ep" only when he picked the episode; the compliment only when he typed it.
+- Subject: 1–3 lowercase words (channel name, "your episodes").
+- Versions in the tool: classic (default), data first, short, question (safest: no stats, data goes in the reply).
+- One follow-up only (day 3), his words: "hey {name}, just following up on the last mail. hope i'm not troubling :)".
+- Pitch only after they reply. Deliverability first: if in doubt, send less.
 
 ## End of session
 Update `docs/STATUS.md` and `docs/DECISIONS.md`, then commit and push.

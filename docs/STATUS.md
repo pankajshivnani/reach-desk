@@ -10,7 +10,7 @@
   - Contacts found in descriptions.
   - **Insight cards**: top 3 scored, rest under "more (use these in the Loom)". Weak ones marked "don't send"; "skip this lead" if nothing is strong.
   - **Your inputs** (saved per channel): host first name, episode you watched, ticks for "clips look AI edited" / "best moments need proper edits", notes.
-  - **Drafts** for the chosen insight: 3 first emails (a question, no stats), 3 DMs (podcast-dm style), "when they reply" data emails (fact + test), pitch, day 3 follow-up, Loom notes. All editable, with copy buttons.
+  - **Drafts** for the chosen insight, in Pankaj's own voice: 4 first emails (classic / data first / short / question), 3 DMs (podcast-dm style), reply-with-data (for the question version), pitch, his day-3 follow-up, Loom notes. New input: "something you liked". All editable, with copy buttons.
   - Channel data: stats, top 5 vs latest 5 thumbnails, the video table (with a "vs nearby" column).
 - "Look up any channel" box for channels found elsewhere (about 3 units).
 - Opt-in "remember key"; quota counter; search cost warning.
@@ -25,7 +25,7 @@ Insights detected: idea-first vs guest-name titles, what the top 5 share, titles
 - **Part A done (2026-10-13):** sheet "Reach Desk Outbox" made in the main account, script + Gmail service installed, `setup` run, notify_email set, web app deployed (version 2) and checked live (right token works, wrong token rejected; status is a POST so the token never sits in a URL).
 - **Part B done (2026-10-13):** all 5 inboxes connected (business.shivnani, zizzytech, zizzytechnologies, pankajshivnani.ai, organicallly @gmail.com): sheet shared as Editor (no notify), `installSender` + `testSend` run in each, all listed in the Inboxes tab, timers running with no errors.
 
-- **Deliverability (2026-10-14):** first real test landed in spam. Ran seed tests (`seedTest` + "Tests" tab + `seed_emails` setting) and switched the first email to a question with no stats; data goes in the reply. One follow-up only (`fu2_days` 0), `daily_cap` 2 while warming up. See DECISIONS.
+- **Deliverability (2026-10-14):** first real test landed in spam. Ran seed tests (`seedTest` + "Tests" tab + `seed_emails` setting) and switched the first email to a question with no stats; data goes in the reply. One follow-up only (`fu2_days` 0), `daily_cap` 2 while warming up. Later the same day: templates rebuilt in Pankaj's own voice from his real sent emails (default = classic with the data). See DECISIONS.
 
 ## Next steps
 0. Pankaj: restrict the YouTube key (Google Cloud Console > APIs & Services > Credentials > API restrictions > YouTube Data API v3).
