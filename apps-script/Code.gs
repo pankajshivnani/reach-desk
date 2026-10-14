@@ -10,12 +10,12 @@ var COLS = ['lead_id', 'date_added', 'channel', 'channel_url', 'country', 'host_
   'status', 'inbox', 'sent_at', 'fu1_at', 'fu2_at', 'replied_at', 'thread_id', 'message_id', 'reply_snippet', 'notes'];
 var DEFAULTS = [
   ['paused', 'FALSE', 'TRUE stops every inbox right away'],
-  ['daily_cap', '4', 'max emails per inbox per day (follow-ups count)'],
+  ['daily_cap', '2', 'max emails per inbox per day (follow-ups count). 2 while warming up'],
   ['window_start', '9', 'first hour to send (sheet time zone: File > Settings)'],
   ['window_end', '17', 'stop sending at this hour'],
   ['weekdays_only', 'TRUE', 'no sending on Sat/Sun'],
   ['fu1_days', '3', 'business days after the first email'],
-  ['fu2_days', '7', 'business days after the first email'],
+  ['fu2_days', '0', 'business days after the first email (0 = no second follow-up)'],
   ['fu1_text', 'hey just checking if you saw this', 'used when a row has no fu1_body'],
   ['fu2_text', 'all good if not interested. can still send the loom if you want', 'used when a row has no fu2_body'],
   ['notify_email', '', 'your main email: you get a short note when someone replies'],
@@ -163,8 +163,9 @@ function sendFollowUp(ss, out, me, cfg, tz, now) {
     var row = out.rows[k], st = row[out.i.status];
     if (String(row[out.i.inbox]).toLowerCase() !== me || !row[out.i.sent_at]) continue;
     var days = bizDays(row[out.i.sent_at], now, tz);
-    var step = st === 'sent' && days >= Number(cfg.fu1_days) ? 'fu1' : st === 'fu1' && days >= Number(cfg.fu2_days) ? 'fu2' : null;
-    if (st === 'fu2' && days >= Number(cfg.fu2_days) + 5) { out.set(k, 'status', 'done'); continue; }
+    var fu2On = Number(cfg.fu2_days) > 0; // fu2_days 0 or blank = only one follow-up
+    var step = st === 'sent' && days >= Number(cfg.fu1_days) ? 'fu1' : fu2On && st === 'fu1' && days >= Number(cfg.fu2_days) ? 'fu2' : null;
+    if ((st === 'fu2' && days >= Number(cfg.fu2_days) + 5) || (!fu2On && st === 'fu1' && days >= Number(cfg.fu1_days) + 5)) { out.set(k, 'status', 'done'); continue; }
     if (!step) continue;
     if (inDne(ss, row[out.i.email])) { out.set(k, 'status', 'skipped-dne'); continue; }
     var body = row[out.i[step + '_body']] || cfg[step + '_text'];
@@ -245,7 +246,7 @@ function status(ss, cfg) {
     var st = r[out.i.status]; counts[st] = (counts[st] || 0) + 1;
     leads[r[out.i.lead_id]] = {status: st, inbox: r[out.i.inbox], sent_at: r[out.i.sent_at], replied_at: r[out.i.replied_at]};
     if (r[out.i.sent_at]) { var d = bizDays(r[out.i.sent_at], now, tz);
-      if ((st === 'sent' && d >= Number(cfg.fu1_days)) || (st === 'fu1' && d >= Number(cfg.fu2_days))) fuDue++; }
+      if ((st === 'sent' && d >= Number(cfg.fu1_days)) || (st === 'fu1' && Number(cfg.fu2_days) > 0 && d >= Number(cfg.fu2_days))) fuDue++; }
   });
   var inboxes = inb.rows.map(function (r) {
     var em = String(r[inb.i.inbox]).toLowerCase(), cap = Number(r[inb.i.cap] || cfg.daily_cap) || 4;

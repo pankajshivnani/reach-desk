@@ -972,12 +972,31 @@ var TPL={
   dm:'after your '+f.g+'-day break eps got a median of '+f.a+' views vs '+f.b+' before.'};}};
 
 function finish(t){return clean(t).replace(/ \n/g,'\n').toLowerCase();}
+/* First email = a short question, no stats (seed tests 2026-10-14: the "stat + tip" cold pattern
+   gets spam-filed; a reply makes later emails land in Primary). The data goes in the reply. */
+var TOPIC={ideaFirst:'your titles',guestFirst:'your titles',longTitles:'your titles',epNumbers:'your titles',
+ top5has:'what your top episodes have in common',top5lacks:'what your top episodes have in common',
+ hiddenGem:'one of your older episodes',evergreen:'one of your older episodes',topic:'which topics pull views',rising:'which topics pull views',
+ reachDrop:'your recent views',gap:'your recent views',noShorts:'your shorts',shortsWin:'your shorts',
+ length:'episode length',chapters:'chapters',trailer:'your channel page'};
+function shortChan(c){var t=clean(c.title).split(/\s+[|\-–—:]\s+/)[0];return t.length>32?t.slice(0,32).replace(/\s+\S*$/,''):t;}
 function emailDrafts(c,ins,lead){
- var T=TPL[ins.type](ins.f), h=hsh(c.id+ins.type), n=lead.name.trim()?' '+lead.name.trim():'', combos=[];
- // every fact x test pair, starting at a different spot per channel so emails don't all look the same
+ var n=lead.name.trim()?' '+lead.name.trim():'', ch=shortChan(c), h=hsh(c.id+ins.type);
+ var longs=c.videos.filter(function(v){return !v.short}).length, N=longs>=5?longs:c.videos.length;
+ var last=N>=3?'your last '+N+' episodes':'your recent episodes', topic=TOPIC[ins.type]||'what gets views', sig=['','pankaj shivnani','zizzy'];
+ var subj=[ch+' on youtube','your youtube channel',ch+' episodes'];
+ var bodies=[
+  ['hey'+n+', are you the one looking after the youtube side of '+ch+'?','','noticed something in '+last+', happy to share if it\'s useful.'],
+  ['hey'+n+', do you handle the youtube channel for '+ch+'?','','went through '+last+' and spotted something about '+topic+'. happy to send it over if useful.'],
+  ['hey'+n+', who looks after '+ch+'\'s youtube?','','found something in '+last+' that might be worth a look. can send it if you want.']];
+ return bodies.map(function(b,i){return{subj:finish(subj[(h+i)%subj.length]),body:b.concat(sig).map(finish).join('\n')};});}
+/* What to send once they reply: the data-backed insight (fact + test) */
+function dataDrafts(c,ins,lead){
+ var T=TPL[ins.type](ins.f), h=hsh(c.id+ins.type), combos=[];
+ // every fact x test pair, starting at a different spot per channel so replies don't all look the same
  T.fact.forEach(function(fa){T.test.forEach(function(te){combos.push(fa+' '+te);});});
- return combos.map(function(_,i){return combos[(h+i)%combos.length]}).slice(0,3).map(function(mid,i){
-  return{subj:T.subj[(h+i)%T.subj.length],body:['hey'+n,'',mid,'','pankaj'].map(finish).join('\n')};});}
+ return combos.map(function(_,i){return combos[(h+i)%combos.length]}).slice(0,2).map(function(mid){
+  return ['here it is.','',mid,'','found a few more things like this too, can share a loom if you want.','','pankaj'].map(finish).join('\n');});}
 function dmDrafts(c,ins,all,lead){
  var T=TPL[ins.type](ins.f), n=lead.name.trim()?' '+lead.name.trim():'', ep=lead.ep?shortTitle(lead.ep):'', chan=clean(c.title);
  var open1=ep?'hey'+n+' watched the '+ep+' ep.':'hey'+n+' came across '+chan+'.';
@@ -994,7 +1013,7 @@ function dmDrafts(c,ins,all,lead){
   open1+' '+T.dm+' worth a/b testing titles and thumbnails on this. can share a loom if you want'
  ].map(finish);}
 var REPLY='i do this for channels, a/b testing titles and thumbnails, clips, edits. found a few more things like this on yours, happy to share a loom.';
-var FOLLOW=['day 3: hey just checking if you saw this','day 7: all good if not interested. can still send the loom if you want'];
+var FOLLOW=['day 3: hey just checking if you saw this'];
 
 /* ---------- Lead panel ---------- */
 function mmss(secs){var h=Math.floor(secs/3600),m=Math.floor(secs%3600/60),s=secs%60;
@@ -1127,9 +1146,10 @@ function renderLead(){
    +(sub!=null&&pick.send?'<button class="chip" data-q="1">Queue this email</button> ':'')+'<button class="chip" data-cp="ta">Copy '+title+'</button></span></div></div>';}
   box.innerHTML=(pick.send?'':'<p class="status bad">This insight is weak. Better not to send it.</p>')
    +(!L.name.trim()?'<p class="hint warn">Add the host\'s first name above. Drafts say "hey" until you do.</p>':'')
-   +'<h3>Email &mdash; 3 versions (no pitch)</h3><div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj)}).join('')+'</div>'
+   +'<h3>First email &mdash; 3 versions (a question, no stats, no pitch)</h3><div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj)}).join('')+'</div>'
    +'<h3>DM &mdash; LinkedIn / X / IG</h3><div class="drafts">'+dm.map(function(t){return blk('DM',t)}).join('')+'</div>'
-   +'<h3>If they reply &mdash; pitch</h3><div class="drafts">'+blk('reply',REPLY)+'</div>'
+   +'<h3>When they reply &mdash; send the data</h3><div class="drafts">'+dataDrafts(c,pick,L).map(function(t){return blk('reply',t)}).join('')+'</div>'
+   +'<h3>If they want more &mdash; pitch</h3><div class="drafts">'+blk('reply',REPLY)+'</div>'
    +'<h3>Follow-ups</h3><div class="drafts">'+FOLLOW.map(function(t){return blk('follow-up',t.replace(/^day \d: /,''),null).replace('<div class="draft">','<div class="draft"><span class="tag">'+t.slice(0,5)+'</span>')}).join('')+'</div>'
    +'<h3>Loom notes</h3><div class="drafts">'+blk('Loom notes',loom.length?loom.join('\n'):'- nothing else found')+'</div>';
   box.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(){var d=b.closest('.draft'),
@@ -1158,7 +1178,7 @@ function outboxRow(c,ins,L,subj,body){
  if(!L.name.trim()&&!obSendWithoutName)return 'Add the host\'s first name first (or set send_without_name to TRUE in the sheet).';
  return{lead_id:c.id,channel:c.title,channel_url:'https://www.youtube.com/channel/'+c.id,country:c.country||'',
   host_name:L.name.trim(),email:email,email_source:c.contacts.emails.indexOf(email)>=0?'description':'manual',
-  template_version:'insight-v1',insight_type:ins.type,insight_score:ins.score,starred:L.star?'TRUE':'',subject:subj,body:body,
+  template_version:'ask-v1',insight_type:ins.type,insight_score:ins.score,starred:L.star?'TRUE':'',subject:subj,body:body,
   fu1_body:'',fu2_body:''};}
 
 async function queueRows(rows){var o=obConf();

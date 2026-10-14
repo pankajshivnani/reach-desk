@@ -21,11 +21,13 @@ Local tool for Zizzy (Pankaj's agency) to find YouTube channels/podcasts, analyz
 - Build in small working steps. After each step: tell him how to open and test it, then commit and push.
 
 ## Email style (for the draft templates)
-- subject: 2–4 lowercase words about them ("your top 5 videos")
-- "hey {name}", then one fact with a number from their channel + one test to try. ~40 words.
+- **First email = a short question, no stats** (decided 2026-10-14 after spam tests, see DECISIONS): "hey {name}, are you the one looking after the youtube side of {channel}?" + "noticed something in your last N episodes, happy to share if it's useful." ~30 words.
+- subject: 2–4 lowercase words about them ("{channel} on youtube")
 - all lowercase, raw, like typed on a phone. No links, no "i help", no services list, no call ask, no sales words ("scale", "leverage", "quick call", "hope this finds you well").
-- sign off: "pankaj"
-- Pitch only goes in the REPLY (after they answer).
+- sign off: "pankaj shivnani" / "zizzy" on the first email (real identity); "pankaj" in replies.
+- **When they reply:** one fact with a number from their channel + one test to try, offer a loom.
+- Pitch only after that.
+- One follow-up only (day 3). Deliverability first: if in doubt, send less.
 
 ## End of session
 Update `docs/STATUS.md` and `docs/DECISIONS.md`, then commit and push.

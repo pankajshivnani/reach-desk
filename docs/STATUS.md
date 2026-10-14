@@ -1,6 +1,6 @@
 # Status
 
-**Last updated:** 2026-10-13
+**Last updated:** 2026-10-14
 
 ## Where we are
 `reach-desk.html` = v5 search + a **lead panel** for every lead. Steps 1–3 of the spec are built and tested with fake data; **not yet tested with a real API key.** `prospect-finder-v5.html` stays as the untouched original.
@@ -10,7 +10,7 @@
   - Contacts found in descriptions.
   - **Insight cards**: top 3 scored, rest under "more (use these in the Loom)". Weak ones marked "don't send"; "skip this lead" if nothing is strong.
   - **Your inputs** (saved per channel): host first name, episode you watched, ticks for "clips look AI edited" / "best moments need proper edits", notes.
-  - **Drafts** for the chosen insight: up to 3 emails (no pitch), 3 DMs (podcast-dm style), reply pitch, day 3 / day 7 follow-ups, Loom notes. All editable, with copy buttons.
+  - **Drafts** for the chosen insight: 3 first emails (a question, no stats), 3 DMs (podcast-dm style), "when they reply" data emails (fact + test), pitch, day 3 follow-up, Loom notes. All editable, with copy buttons.
   - Channel data: stats, top 5 vs latest 5 thumbnails, the video table (with a "vs nearby" column).
 - "Look up any channel" box for channels found elsewhere (about 3 units).
 - Opt-in "remember key"; quota counter; search cost warning.
@@ -25,9 +25,11 @@ Insights detected: idea-first vs guest-name titles, what the top 5 share, titles
 - **Part A done (2026-10-13):** sheet "Reach Desk Outbox" made in the main account, script + Gmail service installed, `setup` run, notify_email set, web app deployed (version 2) and checked live (right token works, wrong token rejected; status is a POST so the token never sits in a URL).
 - **Part B done (2026-10-13):** all 5 inboxes connected (business.shivnani, zizzytech, zizzytechnologies, pankajshivnani.ai, organicallly @gmail.com): sheet shared as Editor (no notify), `installSender` + `testSend` run in each, all listed in the Inboxes tab, timers running with no errors.
 
+- **Deliverability (2026-10-14):** first real test landed in spam. Ran seed tests (`seedTest` + "Tests" tab + `seed_emails` setting) and switched the first email to a question with no stats; data goes in the reply. One follow-up only (`fu2_days` 0), `daily_cap` 2 while warming up. See DECISIONS.
+
 ## Next steps
 0. Pankaj: restrict the YouTube key (Google Cloud Console > APIs & Services > Credentials > API restrictions > YouTube Data API v3).
-1. Pankaj: paste the Outbox URL + token into Reach Desk Keys (step A9), then queue 1–2 test leads to his own other addresses to see the first email + follow-up thread before real leads.
+1. Pankaj: queue the first real leads (starred best ones), 2/inbox/day. Watch replies. After 15–20 sends with zero replies, stop and rethink. Optional: 2–3 friends' Gmail/Outlook as unbiased seed inboxes.
 2. Pankaj tests insights on the 5 known channels (AI Island, SyndicateRoom, Venture Atlanta, Capital Allocators, Scaling Europe) and says which drafts he'd send.
 3. Tune thresholds/templates from that feedback (especially guest-name detection).
 4. Apollo CSV export/import for missing emails (free-plan friendly).
@@ -35,4 +37,4 @@ Insights detected: idea-first vs guest-name titles, what the top 5 share, titles
 6. Backup button (notes + saved channels to a file).
 
 ## Waiting on
-- Pankaj's real-key test and first inbox setup.
+- First real sends and replies.
