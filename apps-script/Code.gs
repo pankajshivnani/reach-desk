@@ -67,6 +67,39 @@ function testSend() {
   Logger.log('Sent. Gmail thread ' + r.threadId);
 }
 
+/* ---------- Inbox placement test ----------
+ * Run as one inbox: sends each wording in the "Tests" tab to a different address in
+ * Settings > seed_emails (rotated per inbox, so no seed gets two emails from the same inbox),
+ * a minute or so apart. Then check where each landed (Primary / Promotions / Spam).
+ * Don't reply to them or click "Not spam" until the result is written down. */
+var SEED_VARIANTS = [
+  ['variant', 'subject', 'body'],
+  ['A-tip-lower', 'titles getting cut off', 'hey sam\n\n11 of your last 12 titles run past 60 characters, so phones cut off the end. worth testing a few under 50.\n\npankaj'],
+  ['B-tip-proper', 'Your episode titles', 'Hey Sam,\n\n11 of your last 12 titles on Hatchpad run past 60 characters, so phones cut off the end. Might be worth testing a few under 50.\n\nPankaj Shivnani\nZizzy'],
+  ['C-ask-lower', 'hatchpad on youtube', 'hey sam, are you the one looking after the youtube side of hatchpad?\n\nnoticed something in your last 12 episodes, happy to share if it\'s useful.\n\npankaj shivnani\nzizzy'],
+  ['D-ask-proper', 'Hatchpad on YouTube', 'Hi Sam,\n\nAre you the person who looks after Hatchpad\'s YouTube channel? I noticed something in your last 12 episodes and I\'m happy to share it if it\'s useful.\n\nPankaj Shivnani\nZizzy']
+];
+function seedTest() {
+  var ss = SpreadsheetApp.getActive(), me = Session.getEffectiveUser().getEmail().toLowerCase();
+  var tests = ss.getSheetByName('Tests');
+  if (!tests) { tests = ss.insertSheet('Tests'); SEED_VARIANTS.forEach(function (r) { tests.appendRow(r); }); tests.setFrozenRows(1); }
+  if (!('seed_emails' in settings(ss))) ss.getSheetByName(TABS.set).appendRow(['seed_emails', '', 'test inboxes you own, comma separated (seedTest)']);
+  var seeds = String(settings(ss).seed_emails || '').split(/[,\s]+/).filter(function (s) { return s.indexOf('@') > 0; });
+  if (!seeds.length) throw new Error('Put your test addresses in Settings > seed_emails first.');
+  var rows = tests.getDataRange().getValues().slice(1).filter(function (r) { return r[0] && r[2]; });
+  var inb = table(ss, TABS.inb), offset = 0;
+  inb.rows.forEach(function (r, k) { if (String(r[inb.i.inbox]).toLowerCase() === me) offset = k; });
+  var n = Math.min(rows.length, seeds.length);
+  for (var k = 0; k < n; k++) {
+    var to = seeds[(k + offset) % seeds.length];
+    if (to.toLowerCase() === me) continue;
+    if (k) Utilities.sleep(40000 + Math.floor(Math.random() * 40000));
+    sendRaw(to, rows[k][1], rows[k][2], null, null);
+    log(ss, me, '', 'seed-test', rows[k][0] + ' -> ' + to);
+    Logger.log(rows[k][0] + ' -> ' + to);
+  }
+}
+
 /* ---------- The timer ---------- */
 function run() {
   var lock = LockService.getUserLock();
