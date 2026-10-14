@@ -21,13 +21,16 @@ Local tool for Zizzy (Pankaj's agency) to find YouTube channels/podcasts, analyz
 - Build in small working steps. After each step: tell him how to open and test it, then commit and push.
 
 ## Email style (for the draft templates)
-- **Pankaj's own voice** (decided 2026-10-14, from the podcast emails he actually sent; see DECISIONS): "hey {name}, watched the {guest} ep. {something he genuinely liked}. feel a lot more juice can be taken out of these episodes." + one fact with a number from their channel + what to do (a/b testing titles and thumbnails; trailer / chapter cuts only if the data shows they're missing; proper edits on the banger moments only if he ticked it) + "can share a loom if you want :)" + "cheers, / pankaj".
-- all lowercase, raw, like typed on a phone. No links, no services list, no call ask, no sales words ("scale", "leverage", "quick call", "hope this finds you well"). No "i help" in the first email.
-- Never invent: "watched the X ep" only when he picked the episode; the compliment only when he typed it.
-- Subject: 1–3 lowercase words (channel name, "your episodes").
-- Versions in the tool: classic (default), data first, short, question (safest: no stats, data goes in the reply).
-- One follow-up only (day 3), his words: "hey {name}, just following up on the last mail. hope i'm not troubling :)".
-- Pitch only after they reply. Deliverability first: if in doubt, send less.
+Picked by Pankaj on 2026-10-14 (see DECISIONS). Say who he is and why he's writing, one real thing noticed, a direct offer, an easy out. Short, lowercase, typed-on-a-phone. Never sounds automated.
+- **#2 self-aware:** "hey {name}, i know you probably get a lot of these so i'll keep it short. / i'm pankaj, we help tech and finance companies grow on youtube. was going through {channel} and noticed {fact}. / if that's worth fixing, lmk. if not, all good"
+- **#3 honest question:** "hey {name}, honest question. is youtube something you're actively trying to grow for {channel}, or more of a side thing? / asking cause i noticed a couple of things on the channel that could move views a fair bit. we do organic youtube growth for tech and finance companies."
+- **#4 gives first:** "i'm pankaj. not trying to sell you anything in this one." + fact + test + "if it works and you want more of this, it's what we do :)"
+- **#5 real compliment:** only when Pankaj typed something he genuinely liked; + "which is why it bugged me a bit that {fact}."
+- Each has its own 2 follow-ups (day 3, day 7, same thread), different angle each time, never "bump".
+- Sign off "pankaj". Subject = channel name or similar, lowercase. No links, no call ask, no sales words, no long dashes, no polished lists of three.
+- Never invent: compliments and "watched the X ep" only from what Pankaj typed; facts only from channel data.
+- Positioning: "tech and finance companies" (not only podcasts).
+- Bulk queueing rotates templates (#2 and #3 twice as often) and records `template_version` so reply rates can be compared.
 
 ## End of session
 Update `docs/STATUS.md` and `docs/DECISIONS.md`, then commit and push.

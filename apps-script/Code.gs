@@ -15,7 +15,7 @@ var DEFAULTS = [
   ['window_end', '17', 'stop sending at this hour'],
   ['weekdays_only', 'TRUE', 'no sending on Sat/Sun'],
   ['fu1_days', '3', 'business days after the first email'],
-  ['fu2_days', '0', 'business days after the first email (0 = no second follow-up)'],
+  ['fu2_days', '7', 'business days after the first email (0 = no second follow-up)'],
   ['fu1_text', 'hey just checking if you saw this', 'used when a row has no fu1_body'],
   ['fu2_text', 'all good if not interested. can still send the loom if you want', 'used when a row has no fu2_body'],
   ['notify_email', '', 'your main email: you get a short note when someone replies'],
@@ -71,17 +71,25 @@ function testSend() {
  * Run as one inbox: sends each wording in the "Tests" tab to a different address in
  * Settings > seed_emails (rotated per inbox, so no seed gets two emails from the same inbox),
  * a minute or so apart. Then check where each landed (Primary / Promotions / Spam).
- * Don't reply to them or click "Not spam" until the result is written down. */
+ * Don't reply to them or click "Not spam" until the result is written down.
+ * seedFollowUps(): run later as the same inbox to send each test's follow-up in the same thread. */
+var SEED_ROUND = 'r2';
 var SEED_VARIANTS = [
-  ['variant', 'subject', 'body'],
-  ['A-tip-lower', 'titles getting cut off', 'hey sam\n\n11 of your last 12 titles run past 60 characters, so phones cut off the end. worth testing a few under 50.\n\npankaj'],
-  ['B-tip-proper', 'Your episode titles', 'Hey Sam,\n\n11 of your last 12 titles on Hatchpad run past 60 characters, so phones cut off the end. Might be worth testing a few under 50.\n\nPankaj Shivnani\nZizzy'],
-  ['C-ask-lower', 'hatchpad on youtube', 'hey sam, are you the one looking after the youtube side of hatchpad?\n\nnoticed something in your last 12 episodes, happy to share if it\'s useful.\n\npankaj shivnani\nzizzy'],
-  ['D-ask-proper', 'Hatchpad on YouTube', 'Hi Sam,\n\nAre you the person who looks after Hatchpad\'s YouTube channel? I noticed something in your last 12 episodes and I\'m happy to share it if it\'s useful.\n\nPankaj Shivnani\nZizzy']
+  ['variant', 'subject', 'body', 'fu1'],
+  ['r2-t2-selfaware', 'hatchpad', 'hey sam, i know you probably get a lot of these so i\'ll keep it short.\n\ni\'m pankaj, we help tech and finance companies grow on youtube. was going through hatchpad and noticed 11 of your last 12 titles run past 60 characters, so phones cut off the end.\n\nif that\'s worth fixing, lmk. if not, all good\n\npankaj',
+    'hey sam, following up on this one. it\'s a pretty easy fix tbh, happy to show you on a loom if you want :)\n\npankaj'],
+  ['r2-t3-question', 'youtube at hatchpad', 'hey sam, honest question. is youtube something you\'re actively trying to grow for hatchpad, or more of a side thing?\n\nasking cause i noticed a couple of things on the channel that could move views a fair bit. we do organic youtube growth for tech and finance companies.\n\npankaj',
+    'hey sam, following up in case this got lost. is youtube a focus for hatchpad this year?\n\npankaj'],
+  ['r2-t4-givesfirst', 'hatchpad titles', 'hey sam, i\'m pankaj. not trying to sell you anything in this one.\n\nwent through hatchpad on youtube. 11 of your last 12 titles run past 60 characters, so phones cut off the end.\n\nworth testing a few under 50. if it works and you want more of this, it\'s what we do :)\n\npankaj',
+    'hey sam, did you get a chance to try it? curious if it moved anything\n\npankaj'],
+  ['r2-t5-compliment', 'hatchpad', 'hey sam, the founder interviews on hatchpad are honestly some of the better ones i\'ve seen.\n\nwhich is why it bugged me a bit that 11 of your last 12 titles run past 60 characters, so phones cut off the end. the episodes deserve way more reach than that.\n\nwe help tech and finance companies grow on youtube. lmk if you\'d want help with it\n\npankaj',
+    'hey sam, following up on this. still think the channel deserves a lot more reach. happy to share a loom on what i\'d do\n\npankaj']
 ];
 function seedTest() {
   var ss = SpreadsheetApp.getActive(), me = Session.getEffectiveUser().getEmail().toLowerCase();
   var tests = ss.getSheetByName('Tests');
+  if (tests && String(tests.getRange(2, 1).getValue()).indexOf(SEED_ROUND + '-') !== 0) { // new round: keep the old one for reference
+    tests.setName('Tests ' + Utilities.formatDate(new Date(), ss.getSpreadsheetTimeZone(), 'MMM d HH:mm')); tests = null; }
   if (!tests) { tests = ss.insertSheet('Tests'); SEED_VARIANTS.forEach(function (r) { tests.appendRow(r); }); tests.setFrozenRows(1); }
   if (!('seed_emails' in settings(ss))) ss.getSheetByName(TABS.set).appendRow(['seed_emails', '', 'test inboxes you own, comma separated (seedTest)']);
   var seeds = String(settings(ss).seed_emails || '').split(/[,\s]+/).filter(function (s) { return s.indexOf('@') > 0; });
@@ -94,10 +102,28 @@ function seedTest() {
     var to = seeds[(k + offset) % seeds.length];
     if (to.toLowerCase() === me) continue;
     if (k) Utilities.sleep(40000 + Math.floor(Math.random() * 40000));
-    sendRaw(to, rows[k][1], rows[k][2], null, null);
-    log(ss, me, '', 'seed-test', rows[k][0] + ' -> ' + to);
+    var r = sendRaw(to, rows[k][1], rows[k][2], null, null);
+    log(ss, me, r.id + ' ' + r.threadId, 'seed-test', rows[k][0] + ' -> ' + to);
     Logger.log(rows[k][0] + ' -> ' + to);
   }
+}
+/* Sends the "fu1" text from the Tests tab as a reply in each thread this inbox's seedTest started (once each) */
+function seedFollowUps() {
+  var ss = SpreadsheetApp.getActive(), me = Session.getEffectiveUser().getEmail().toLowerCase();
+  var fu = {}; ss.getSheetByName('Tests').getDataRange().getValues().slice(1).forEach(function (r) { if (r[0] && r[3]) fu[r[0]] = r[3]; });
+  var lg = table(ss, TABS.log), done = {};
+  lg.rows.forEach(function (r) { if (r[lg.i.event] === 'seed-fu') done[r[lg.i.lead_id]] = 1; });
+  var k = 0;
+  lg.rows.forEach(function (r) {
+    if (r[lg.i.event] !== 'seed-test' || String(r[lg.i.inbox]).toLowerCase() !== me || done[r[lg.i.lead_id]]) return;
+    var ids = String(r[lg.i.lead_id]).split(' '), m = /^(\S+) -> (\S+)$/.exec(r[lg.i.detail]);
+    if (ids.length < 2 || !m || !fu[m[1]]) return;
+    var subj = ss.getSheetByName('Tests').getDataRange().getValues().filter(function (t) { return t[0] === m[1]; })[0][1];
+    if (k++) Utilities.sleep(30000 + Math.floor(Math.random() * 30000));
+    sendRaw(m[2], 're: ' + subj, fu[m[1]], ids[1], messageId(ids[0]));
+    log(ss, me, r[lg.i.lead_id], 'seed-fu', m[1] + ' -> ' + m[2]);
+    Logger.log('follow-up ' + m[1] + ' -> ' + m[2]);
+  });
 }
 
 /* ---------- The timer ---------- */

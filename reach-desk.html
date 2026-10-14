@@ -972,49 +972,44 @@ var TPL={
   dm:'after your '+f.g+'-day break eps got a median of '+f.a+' views vs '+f.b+' before.'};}};
 
 function finish(t){return clean(t).replace(/ \n/g,'\n').toLowerCase();}
-/* First email = a short question, no stats (seed tests 2026-10-14: the "stat + tip" cold pattern
-   gets spam-filed; a reply makes later emails land in Primary). The data goes in the reply. */
-var TOPIC={ideaFirst:'your titles',guestFirst:'your titles',longTitles:'your titles',epNumbers:'your titles',
- top5has:'what your top episodes have in common',top5lacks:'what your top episodes have in common',
- hiddenGem:'one of your older episodes',evergreen:'one of your older episodes',topic:'which topics pull views',rising:'which topics pull views',
- reachDrop:'your recent views',gap:'your recent views',noShorts:'your shorts',shortsWin:'your shorts',
- length:'episode length',chapters:'chapters',trailer:'your channel page'};
+/* First emails, picked by Pankaj on 2026-10-14 (#2 self-aware, #3 honest question, #4 gives first,
+   #5 real compliment). Each has its own 2 follow-ups. Small wording swaps per channel so no two emails
+   look the same. #5 only exists when he typed something he genuinely liked; nothing is invented. */
 function shortChan(c){var t=clean(c.title).split(/\s+[|\-–—:]\s+/)[0];return t.length>32?t.slice(0,32).replace(/\s+\S*$/,''):t;}
-/* Pankaj's own voice, taken from the podcast emails he actually sent (business.shivnani / pankajshivnani.ai,
-   Oct 2026): "hey X, watched the Y ep / came across Z's youtube" + something good + "feel a lot more juice can be
-   taken out of these episodes" + what to do + "can share a loom if you want :)" + "cheers, pankaj".
-   The only things that change per lead: name, episode he watched, what he liked, the insight. Nothing invented:
-   "watched" only when he picked an episode, the compliment only when he typed it. */
-function asksFor(c,ins,all,lead){
- var a=['a/b testing titles and thumbnails to see what actually pulls people in'];
- if(!c.trailer)a.push('a short trailer up front');
- if(all.some(function(o){return o.type==='chapters'}))a.push('chapter cuts');
- if(lead.edits||lead.ai)a.push('proper edits on the banger moments so they travel'+(lead.ai?' (the rest can stay ai edited)':''));
- return a.length>1?a.slice(0,-1).join(', ')+' and '+a[a.length-1]:a[0];}
+var WE=['we help tech and finance companies grow on youtube','we do organic youtube growth for tech and finance companies'];
 function emailDrafts(c,ins,lead,all){
  all=all||[ins];
  var n=lead.name.trim()?' '+lead.name.trim():'', ch=shortChan(c), h=hsh(c.id+ins.type), T=TPL[ins.type](ins.f);
- var ep=lead.ep?shortTitle(lead.ep):'', good=(lead.good||'').trim().replace(/[.\s]+$/,'');
- var fact=T.fact[h%T.fact.length].replace(/\.$/,''), test=T.test[h%T.test.length];
- var open=ep?'hey'+n+', watched the '+ep+' ep.':'hey'+n+', came across '+ch+'\'s youtube.';
- var open2=ep?'hey'+n+', caught the '+ep+' ep.':'hey'+n+', been going through '+ch+' on youtube.';
- var liked=good?' '+good+'.':'', asks=asksFor(c,ins,all,lead), sig=['','cheers,','pankaj'];
- var longs=c.videos.filter(function(v){return !v.short}).length, N=longs>=5?longs:c.videos.length;
- var subj=[ch,ch+' on youtube','your episodes'];
- var bodies=[
-  // 1. his classic: opener, liked, juice line, the data, what to do, loom
-  [open+liked+' feel a lot more juice can be taken out of these episodes.','',fact+'. '+asks+'.','','can share a loom if you want :)'],
-  // 2. data first, then the juice line
-  [open2+liked,'','noticed '+fact+'. i feel there\'s a lot more that can be taken out of each episode. '+test,'','can share a loom for better context :)'],
-  // 3. short
-  [open+liked+' '+fact+'. '+test,'','happy to share a loom if useful :)'],
-  // 4. safest for inbox: a question, no stats (see DECISIONS 2026-10-14)
-  [open+liked+' are you the one looking after the youtube side?','','noticed something in '+(N>=3?'your last '+N+' episodes':'your recent episodes')+', can share a loom if you want :)']];
- return bodies.map(function(b,i){return{label:['classic','data first','short','question (safest)'][i],
-  subj:finish(subj[(h+i)%subj.length]),body:b.concat(sig).map(finish).join('\n')};});}
-/* His follow-up, sent in the same thread on day 3 */
-function followUp(lead){var n=lead.name.trim()?' '+lead.name.trim():'';
- return ['hey'+n+', just following up on the last mail. hope i\'m not troubling :)','','cheers,','pankaj'].map(finish).join('\n');}
+ function pick(a,k){return a[(h+(k||0))%a.length];}
+ var fact=pick(T.fact).replace(/\.$/,''), test=pick(T.test), we=pick(WE), good=(lead.good||'').trim().replace(/[.\s]+$/,'');
+ var things=all.filter(function(o){return o.send}).length>1?'a couple of things':'something';
+ var out=[
+  {key:'t2',label:'#2 self-aware',subj:[ch,ch+' on youtube'],
+   body:['hey'+n+', i know you probably get a lot of these so i\'ll keep it short.','',
+    'i\'m pankaj, '+we+'. was going through '+ch+' and noticed '+fact+'.','',
+    pick(['if that\'s worth fixing, lmk. if not, all good','if you want help with it, lmk. if not, all good'],1)],
+   fu1:['hey'+n+', following up on this one. it\'s a pretty easy fix tbh, happy to show you on a loom if you want :)'],
+   fu2:['last one from me. if youtube\'s not a priority right now, totally get it. if it is, lmk and i\'ll send what i\'d change first']},
+  {key:'t3',label:'#3 honest question',subj:[ch,'youtube at '+ch],
+   body:['hey'+n+', honest question. is youtube something you\'re actively trying to grow for '+ch+', or more of a side thing?','',
+    'asking cause i noticed '+things+' on the channel that could move views a fair bit. '+we+'.'],
+   fu1:['hey'+n+', following up in case this got lost. is youtube a focus for '+ch+' this year?'],
+   fu2:['guessing it\'s more of a side thing for now, all good. if that changes, i\'m around :)']},
+  {key:'t4',label:'#4 gives first',subj:[ch,ch+' titles'],
+   body:['hey'+n+', i\'m pankaj. not trying to sell you anything in this one.','',
+    'went through '+ch+' on youtube. '+fact+'.','',test+' if it works and you want more of this, it\'s what we do :)'],
+   fu1:['hey'+n+', did you get a chance to try it? curious if it moved anything'],
+   fu2:['no worries if not. if you ever want someone to run this properly, lmk']}];
+ if(good)out.push({key:'t5',label:'#5 real compliment',subj:[ch],
+   body:['hey'+n+', '+good+'.','','which is why it bugged me a bit that '+fact+'. the episodes deserve way more reach than that.','',
+    pick(WE)+'. lmk if you\'d want help with it'],
+   fu1:['hey'+n+', following up on this. still think the channel deserves a lot more reach. happy to share a loom on what i\'d do'],
+   fu2:['all good if it\'s not the right time. leaving it here, lmk if anything changes :)']});
+ return out.map(function(e,i){return{key:e.key,label:e.label,subj:finish(pick(e.subj,i)),
+  body:e.body.concat(['','pankaj']).map(finish).join('\n'),fu1:e.fu1.concat(['','pankaj']).map(finish).join('\n'),fu2:e.fu2.concat(['','pankaj']).map(finish).join('\n')};});}
+/* Bulk queueing rotates templates across leads (2 and 3 twice as often) so the sheet shows which one gets replies */
+function rotateDraft(c,em){var pool=['t2','t3','t2','t3','t4','t5'].filter(function(k){return em.some(function(e){return e.key===k})});
+ var k=pool[hsh(c.id)%pool.length];return em.filter(function(e){return e.key===k})[0];}
 /* What to send once they reply: the data-backed insight (fact + test) */
 function dataDrafts(c,ins,lead){
  var T=TPL[ins.type](ins.f), h=hsh(c.id+ins.type), combos=[];
@@ -1038,7 +1033,6 @@ function dmDrafts(c,ins,all,lead){
   open1+' '+T.dm+' worth a/b testing titles and thumbnails on this. can share a loom if you want'
  ].map(finish);}
 var REPLY='i do this for channels, a/b testing titles and thumbnails, clips, edits. found a few more things like this on yours, happy to share a loom.';
-var FOLLOW=['day 3: hey just checking if you saw this'];
 
 /* ---------- Lead panel ---------- */
 function mmss(secs){var h=Math.floor(secs/3600),m=Math.floor(secs%3600/60),s=secs%60;
@@ -1100,9 +1094,9 @@ function renderLead(){
     +'<span class="tag" id="lobst">'+esc(outboxLine(c.id))+'</span></div></div><div class="chips" id="lsug"></div><div>'
    +'<div><label for="lep">Episode you watched (optional)</label><select id="lep"><option value="">(none)</option>'
     +vids.map(function(v){return '<option value="'+esc(v.title)+'"'+(L.ep===v.title?' selected':'')+'>'+esc(v.title.slice(0,80))+'</option>'}).join('')+'</select></div></div>'
-   +'<label for="lgood" style="margin-top:10px">Something you genuinely liked (goes in the email, optional)</label><input id="lgood" value="'+esc(L.good)+'" placeholder="e.g. really like how raw and honest the conversations are">'
    +'<p class="hint" style="margin-top:8px"><label class="inl"><input type="checkbox" id="lai"'+(L.ai?' checked':'')+'> clips look AI edited</label>'
    +' &nbsp; <label class="inl"><input type="checkbox" id="ledits"'+(L.edits?' checked':'')+'> best moments need proper edits</label></p>'
+   +'<label for="lgood" style="margin-top:10px">Something you genuinely liked (optional, turns on email #5)</label><input id="lgood" value="'+esc(L.good||'')+'" placeholder="e.g. the bvp keynotes are honestly some of the better ones i\'ve seen in fintech">'
    +'<label for="lnotes" style="margin-top:10px">My notes (what you saw: edits, vibe, a moment)</label><textarea id="lnotes" style="min-height:70px">'+esc(L.notes)+'</textarea>'
 
   +'<div id="drafts"></div>'
@@ -1167,23 +1161,27 @@ function renderLead(){
   if(L.ai)loom.push('- clips look ai edited: fine for most, the best moments need proper edits');
   if(L.edits)loom.push('- best moments need proper edits');
   if(L.notes.trim())loom.push('- my notes: '+L.notes.trim());
-  function blk(title,text,sub,label){return '<div class="draft">'+(label?'<span class="tag">'+esc(label)+'</span>':'')+(sub!=null?'<div class="drow"><input value="'+esc(sub)+'"><button class="chip" data-cp="prev">Copy subject</button></div>':'')
-   +'<textarea>'+esc(text)+'</textarea><div class="drow"><span class="count">'+text.split(/\s+/).filter(Boolean).length+' words</span><span>'
+  function blk(title,text,sub,e){return '<div class="draft"'+(e?' data-key="'+e.key+'"':'')+'>'+(e?'<span class="tag">'+esc(e.label)+'</span>':'')
+   +(sub!=null?'<div class="drow"><input value="'+esc(sub)+'"><button class="chip" data-cp="prev">Copy subject</button></div>':'')
+   +'<textarea>'+esc(text)+'</textarea>'
+   +(e?'<span class="tag">follow-up, day 3 (same thread)</span><textarea class="fu1" style="min-height:70px">'+esc(e.fu1)+'</textarea>'
+     +'<span class="tag">follow-up, day 7</span><textarea class="fu2" style="min-height:70px">'+esc(e.fu2)+'</textarea>':'')
+   +'<div class="drow"><span class="count">'+text.split(/\s+/).filter(Boolean).length+' words</span><span>'
    +(sub!=null&&pick.send?'<button class="chip" data-q="1">Queue this email</button> ':'')+'<button class="chip" data-cp="ta">Copy '+title+'</button></span></div></div>';}
   box.innerHTML=(pick.send?'':'<p class="status bad">This insight is weak. Better not to send it.</p>')
    +(!L.name.trim()?'<p class="hint warn">Add the host\'s first name above. Drafts say "hey" until you do.</p>':'')
-   +'<h3>First email &mdash; in your voice</h3>'
-   +(!L.ep||!L.good?'<p class="hint">Tip: pick the episode you watched and add something you liked. It makes the email clearly yours (and less like a template).</p>':'')
-   +'<div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj,e.label)}).join('')+'</div>'
+   +'<h3>First email &mdash; pick one (each comes with its own 2 follow-ups)</h3>'
+   +(!L.good?'<p class="hint">Add "something you genuinely liked" above to unlock #5.</p>':'')
+   +'<div class="drafts">'+em.map(function(e){return blk('email',e.body,e.subj,e)}).join('')+'</div>'
    +'<h3>DM &mdash; LinkedIn / X / IG</h3><div class="drafts">'+dm.map(function(t){return blk('DM',t)}).join('')+'</div>'
-   +'<h3>If you sent the question version &mdash; reply with the data</h3><div class="drafts">'+dataDrafts(c,pick,L).map(function(t){return blk('reply',t)}).join('')+'</div>'
+   +'<h3>When they reply &mdash; send the data</h3><div class="drafts">'+dataDrafts(c,pick,L).map(function(t){return blk('reply',t)}).join('')+'</div>'
    +'<h3>If they want more &mdash; pitch</h3><div class="drafts">'+blk('reply',REPLY)+'</div>'
-   +'<h3>Follow-up (sent automatically on day 3, same thread)</h3><div class="drafts">'+blk('follow-up',followUp(L))+'</div>'
    +'<h3>Loom notes</h3><div class="drafts">'+blk('Loom notes',loom.length?loom.join('\n'):'- nothing else found')+'</div>';
   box.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(){var d=b.closest('.draft'),
    el=b.dataset.cp==='prev'?b.previousElementSibling:d.querySelector('textarea'); copyText(el.value,b);};});
   box.querySelectorAll('[data-q]').forEach(function(b){b.onclick=async function(){var d=b.closest('.draft');
-   var row=outboxRow(c,pick,L,d.querySelector('input').value,d.querySelector('textarea').value,(d.querySelector('.tag')||{}).textContent);
+   var row=outboxRow(c,pick,L,{key:d.dataset.key,subj:d.querySelector('input').value,body:d.querySelector('textarea').value,
+    fu1:d.querySelector('.fu1').value,fu2:d.querySelector('.fu2').value});
    if(typeof row==='string')return alert(row);
    b.disabled=true;b.textContent='Queueing...';
    try{var r=await queueRows([row]); b.textContent=r.added?'Queued':'Not queued';
@@ -1199,15 +1197,15 @@ function outboxLine(id){var s=obLeads[id];return s?'outbox: '+s.status+(s.inbox?
 
 /* Name for bulk queueing: typed name, else only a clear first.last@ email */
 function autoName(c,L){if(L.name.trim())return L.name.trim();var fe=nameFromEmail(L.email||c.contacts.emails[0]);return fe&&fe.sure?fe.name:'';}
-function outboxRow(c,ins,L,subj,body,label){
+function outboxRow(c,ins,L,e){
  var email=(L.email||c.contacts.emails[0]||'').trim().toLowerCase();
  if(!email)return 'No email for this lead. Add one in "Email to send to" (from Apollo or by hand).';
  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return 'That email doesn\'t look right: '+email;
  if(!L.name.trim()&&!obSendWithoutName)return 'Add the host\'s first name first (or set send_without_name to TRUE in the sheet).';
  return{lead_id:c.id,channel:c.title,channel_url:'https://www.youtube.com/channel/'+c.id,country:c.country||'',
   host_name:L.name.trim(),email:email,email_source:c.contacts.emails.indexOf(email)>=0?'description':'manual',
-  template_version:'voice-v1'+(label?' '+label:''),insight_type:ins.type,insight_score:ins.score,starred:L.star?'TRUE':'',subject:subj,body:body,
-  fu1_body:followUp(L),fu2_body:''};}
+  template_version:e.key+'-v1',insight_type:ins.type,insight_score:ins.score,starred:L.star?'TRUE':'',subject:e.subj,body:e.body,
+  fu1_body:e.fu1,fu2_body:e.fu2};}
 
 async function queueRows(rows){var o=obConf();
  var r=await fetch(o.u,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:o.t,rows:rows})});
@@ -1222,7 +1220,7 @@ $('queuebulk').onclick=async function(){
   var L=leadGet(id), R=insightsFor(c), ins=R.list.filter(function(o){return o.type===L.pick&&o.send})[0]||(R.best&&R.best.send?R.best:null);
   if(!ins)return skipped.push(name+': no strong insight (skip lead)');
   L=Object.assign({},L,{name:autoName(c,L)});
-  var e=emailDrafts(c,ins,L,R.list)[0], row=outboxRow(c,ins,L,e.subj,e.body,e.label);
+  var e=rotateDraft(c,emailDrafts(c,ins,L,R.list)), row=outboxRow(c,ins,L,e);
   if(typeof row==='string')return skipped.push(name+': '+row);
   rows.push(row);});
  if(!rows.length)return say('Nothing queued.\n'+skipped.join('\n'),'bad');
